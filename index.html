@@ -1,0 +1,1090 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nudge - The Art & Science of Showing Up</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Phosphor Icons (replaces Lucide) -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    <!-- Chart.js (replaces Recharts) -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <style>
+        /* Custom styling to match previous React iteration */
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        .accent-emerald-500 { accent-color: #10b981; }
+        
+        /* Smooth transitions for tabs */
+        .tab-content { display: none; opacity: 0; transition: opacity 0.5s ease-in-out; }
+        .tab-content.active { display: block; opacity: 1; animation: fadeInBottom 0.7s ease-out forwards; }
+        
+        @keyframes fadeInBottom {
+            from { opacity: 0; transform: translateY(16px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Tooltip (Science Corner) */
+        .science-tooltip .tooltip-text {
+            visibility: hidden; opacity: 0; transition: all 0.2s;
+            position: absolute; bottom: 100%; left: 50%; transform: translateX(-50%);
+            margin-bottom: 8px; z-index: 50; pointer-events: none;
+        }
+        .science-tooltip:hover .tooltip-text { visibility: visible; opacity: 1; }
+    </style>
+</head>
+<body class="bg-slate-50 font-sans text-slate-900 pb-20 overflow-x-hidden">
+
+    <!-- OVERLAYS -->
+    <div id="loading-overlay" class="fixed inset-0 bg-slate-50 flex items-center justify-center z-50">
+        <i class="ph ph-arrows-clockwise text-3xl text-slate-300 animate-spin"></i>
+    </div>
+
+    <div id="parsing-overlay" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 hidden flex-col items-center justify-center text-white">
+        <div class="w-16 h-16 bg-white rounded-2xl flex items-center justify-center mb-4 shadow-2xl animate-pulse">
+            <i class="ph-fill ph-file-text text-3xl text-emerald-500"></i>
+        </div>
+        <h3 class="text-xl font-bold mb-2">Nudge Analysis Engine</h3>
+        <p class="text-emerald-400 font-medium flex items-center gap-2">
+            <i class="ph ph-arrows-clockwise animate-spin"></i> Extracting contextual data...
+        </p>
+    </div>
+
+    <div id="toast" class="fixed bottom-6 right-6 bg-slate-900 text-white px-6 py-4 rounded-xl shadow-2xl items-center gap-3 z-50 hidden transition-opacity duration-300 opacity-0">
+        <i class="ph-fill ph-check-circle text-xl text-emerald-400"></i>
+        <span id="toast-msg" class="text-sm font-medium"></span>
+    </div>
+
+    <!-- AUTH SCREEN -->
+    <div id="auth-screen" class="min-h-screen bg-slate-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 hidden">
+        <div class="sm:mx-auto sm:w-full sm:max-w-md text-center">
+            <div class="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center shadow-xl mb-6">
+                <span class="text-white font-bold text-3xl tracking-tighter">N</span>
+            </div>
+            <h2 class="text-3xl font-bold tracking-tight text-slate-900">Nudge</h2>
+            <p class="mt-2 text-sm text-slate-500 uppercase tracking-widest font-medium">The Art & Science of Showing Up</p>
+        </div>
+        <div class="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+            <div class="bg-white py-8 px-4 shadow-sm sm:rounded-2xl sm:px-10 border border-slate-200">
+                <form id="auth-form" class="space-y-6">
+                    <div id="auth-error" class="p-3 bg-rose-50 text-rose-600 text-sm rounded-lg border border-rose-100 items-start gap-2 hidden">
+                        <i class="ph ph-info mt-0.5"></i> <span id="auth-error-msg"></span>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Email Address</label>
+                        <input type="email" id="auth-email" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm bg-slate-50" />
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-slate-700">Password</label>
+                        <input type="password" id="auth-password" required class="mt-1 block w-full rounded-lg border border-slate-300 px-3 py-2 shadow-sm focus:border-emerald-500 focus:outline-none focus:ring-emerald-500 sm:text-sm bg-slate-50" />
+                    </div>
+                    <div>
+                        <button type="submit" id="auth-submit-btn" class="flex w-full justify-center items-center gap-2 rounded-lg border border-transparent bg-slate-900 py-2.5 px-4 text-sm font-medium text-white shadow-sm hover:bg-slate-800 focus:outline-none focus:ring-2 focus:ring-slate-900 transition-colors">
+                            <i id="auth-btn-icon" class="ph-bold ph-lock"></i>
+                            <span id="auth-btn-text">Sign In</span>
+                        </button>
+                    </div>
+                </form>
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center"><div class="w-full border-t border-slate-200"></div></div>
+                        <div class="relative flex justify-center text-sm"><span class="bg-white px-2 text-slate-500">Or continue without saving</span></div>
+                    </div>
+                    <div class="mt-6 grid grid-cols-2 gap-3">
+                        <button id="toggle-auth-mode" class="inline-flex w-full justify-center rounded-lg border border-slate-300 bg-white py-2 px-4 text-sm font-medium text-slate-500 shadow-sm hover:bg-slate-50 transition-colors">Create Profile</button>
+                        <button id="guest-login-btn" class="inline-flex w-full justify-center rounded-lg border border-slate-300 bg-emerald-50 py-2 px-4 text-sm font-medium text-emerald-700 shadow-sm hover:bg-emerald-100 transition-colors border-emerald-200">Guest Access</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="main-app" class="hidden">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40">
+            <div class="max-w-6xl mx-auto px-6 py-4 flex flex-col md:flex-row justify-between items-center gap-4">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center shadow-lg">
+                        <span class="text-white font-bold text-lg tracking-tighter">N</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-slate-900 tracking-tight">Nudge</h1>
+                        <div class="flex items-center gap-2 text-xs text-slate-500 font-medium">
+                            The Art & Science of Showing Up
+                            <span class="px-1.5 py-0.5 bg-slate-100 rounded flex items-center gap-1 ml-2" id="sync-status">
+                                <i class="ph ph-check text-emerald-500"></i> Saved
+                            </span>
+                        </div>
+                    </div>
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="file" id="file-upload" class="hidden" accept=".csv,.json,.pdf,.txt" />
+                    <button id="upload-btn" class="flex items-center gap-2 px-4 py-2 bg-slate-100 hover:bg-emerald-50 text-slate-700 hover:text-emerald-700 text-sm font-semibold rounded-lg transition-colors border border-slate-200 hover:border-emerald-200">
+                        <i class="ph-bold ph-upload-simple"></i> Import Labs/Data
+                    </button>
+                    <button id="logout-btn" class="flex items-center gap-2 px-3 py-2 text-slate-400 hover:text-slate-700 text-sm font-semibold transition-colors">
+                        <i class="ph-bold ph-sign-out"></i>
+                    </button>
+                </div>
+            </div>
+            <!-- Navigation -->
+            <div class="max-w-6xl mx-auto px-6 mt-2">
+                <nav class="flex space-x-1 overflow-x-auto hide-scrollbar" id="tab-nav">
+                    <button data-tab="executive" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-emerald-500 text-emerald-600 transition-colors duration-200">Executive Sync</button>
+                    <button data-tab="longevity" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg transition-colors duration-200">Longevity & Health</button>
+                    <button data-tab="wealth" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg transition-colors duration-200">Wealth Span</button>
+                    <button data-tab="nowgevity" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg transition-colors duration-200">Nowgevity</button>
+                    <button data-tab="habits" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg transition-colors duration-200">Habit Builder</button>
+                    <button data-tab="meetnudge" class="tab-btn px-5 py-3 text-sm font-semibold whitespace-nowrap border-b-2 border-transparent text-slate-500 hover:text-slate-800 hover:bg-slate-50 rounded-t-lg transition-colors duration-200">Meet Nudge</button>
+                </nav>
+            </div>
+        </header>
+
+        <main class="max-w-6xl mx-auto px-6 pt-8">
+            
+            <!-- TAB 1: EXECUTIVE SYNC -->
+            <div id="tab-executive" class="tab-content active space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Longevity Chart -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center py-8 relative">
+                        <h3 class="text-lg font-semibold text-slate-800 absolute top-6 left-6 flex items-center gap-2">
+                            <i class="ph-fill ph-activity text-emerald-500"></i> Longevity Score
+                        </h3>
+                        <div class="w-48 h-48 relative mt-4">
+                            <canvas id="chart-longevity"></canvas>
+                        </div>
+                        <div class="w-full mt-6 space-y-3" id="exec-longevity-habits"></div>
+                    </div>
+                    <!-- Nowgevity Chart -->
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col items-center justify-center py-8 relative">
+                        <h3 class="text-lg font-semibold text-slate-800 absolute top-6 left-6 flex items-center gap-2">
+                            <i class="ph-fill ph-heart text-rose-500"></i> Nowgevity Score
+                        </h3>
+                        <div class="w-48 h-48 relative mt-4">
+                            <canvas id="chart-nowgevity"></canvas>
+                        </div>
+                        <div class="w-full mt-6 space-y-3" id="exec-nowgevity-habits"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 2: LONGEVITY & HEALTH -->
+            <div id="tab-longevity" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="md:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between bg-gradient-to-br from-emerald-50 to-white">
+                        <div>
+                            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6 flex items-center justify-between">
+                                Age Arbitration <i class="ph-fill ph-shield-check text-emerald-500 text-lg"></i>
+                            </h3>
+                            <div class="flex justify-between items-end border-b border-emerald-100 pb-4 mb-4">
+                                <div class="text-sm text-slate-600">Chronological</div>
+                                <input type="number" id="inp-chronoAge" class="w-16 bg-transparent text-right text-2xl font-semibold text-slate-800 outline-none hover:bg-emerald-100/50 rounded transition-colors" />
+                            </div>
+                            <div class="flex justify-between items-end border-b border-emerald-100 pb-4">
+                                <div class="text-sm text-slate-600">Biological</div>
+                                <input type="number" id="inp-bioAge" class="w-16 bg-transparent text-right text-2xl font-semibold text-emerald-600 outline-none hover:bg-emerald-100/50 rounded transition-colors" />
+                            </div>
+                        </div>
+                        <div class="pt-6">
+                            <div class="text-5xl font-light text-emerald-500 tracking-tighter" id="txt-ageDelta">-8 <span class="text-xl text-slate-400 font-normal">yrs</span></div>
+                            <p class="text-xs text-slate-500 mt-2">Epigenetic youth dividend</p>
+                        </div>
+                    </div>
+                    <div class="md:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6">Core Biomarkers</h3>
+                        <div class="grid grid-cols-2 gap-6" id="biomarkers-grid">
+                            <!-- Injected via JS -->
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                    <div class="flex justify-between items-center mb-4">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                            <i class="ph-bold ph-target"></i> Functional Foundation: Muscle Synthesis
+                        </h3>
+                    </div>
+                    <div class="flex items-end gap-4 mb-3">
+                        <div class="text-4xl font-light text-slate-800"><span id="txt-protein">165</span><span class="text-xl text-slate-400">g</span></div>
+                        <div class="text-sm text-slate-500 mb-1">/ 213g daily target</div>
+                    </div>
+                    <div class="h-4 bg-slate-100 rounded-full overflow-hidden">
+                        <div id="bar-protein" class="h-full bg-emerald-500 rounded-full transition-all duration-1000 ease-out" style="width: 77%"></div>
+                    </div>
+                    <div class="mt-4 flex gap-2">
+                        <button id="btn-prot-25" class="px-4 py-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-sm font-medium rounded-lg text-slate-700 transition">+25g</button>
+                        <button id="btn-prot-45" class="px-4 py-2 bg-slate-100 hover:bg-emerald-50 hover:text-emerald-700 text-sm font-medium rounded-lg text-slate-700 transition">+45g</button>
+                        <button id="btn-prot-reset" class="px-4 py-2 bg-slate-50 hover:bg-rose-50 hover:text-rose-700 text-sm font-medium rounded-lg text-slate-400 transition ml-auto border border-slate-200">Reset</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 3: WEALTH SPAN -->
+            <div id="tab-wealth" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    <div class="lg:col-span-1 bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+                            <i class="ph-bold ph-compass"></i> Wealth Architecture
+                        </h3>
+                        <div class="space-y-6">
+                            <div>
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 flex justify-between">Today's Total Net Worth</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 font-medium">$</span>
+                                    <input type="number" id="inp-netWorth" step="10000" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 font-semibold focus:outline-none focus:border-emerald-500 transition-colors" />
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-slate-100">
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 block">Asset Allocation (%)</label>
+                                <div class="space-y-3">
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-600">Equities/Growth</span>
+                                        <input type="number" id="inp-equities" class="w-16 bg-slate-50 border border-slate-200 rounded p-1 text-right text-slate-800 font-medium" />
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-600">Fixed Income</span>
+                                        <input type="number" id="inp-fixed" class="w-16 bg-slate-50 border border-slate-200 rounded p-1 text-right text-slate-800 font-medium" />
+                                    </div>
+                                    <div class="flex justify-between items-center text-sm">
+                                        <span class="text-slate-600">Cash/Alts</span>
+                                        <input type="number" id="inp-cash" class="w-16 bg-slate-50 border border-slate-200 rounded p-1 text-right text-slate-800 font-medium" />
+                                    </div>
+                                    <div id="alloc-error" class="text-xs text-rose-500 mt-1 flex items-center gap-1 hidden"><i class="ph-bold ph-info"></i> Allocation must equal 100%</div>
+                                </div>
+                            </div>
+                            <div class="pt-4 border-t border-slate-100">
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 flex justify-between items-center">
+                                    <div class="flex items-center gap-2">
+                                        Required Return
+                                        <span id="risk-badge" class="px-1.5 py-0.5 rounded text-[9px] font-bold border tracking-wider uppercase bg-emerald-100 text-emerald-700 border-emerald-200 cursor-help" title="">LOW RISK</span>
+                                    </div>
+                                    <span id="txt-returnRate">7%</span>
+                                </label>
+                                <input type="range" id="sld-returnRate" min="1" max="15" step="0.5" class="w-full accent-emerald-500" />
+                            </div>
+                            <div class="pt-2">
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 flex justify-between">
+                                    Yearly Deposits <span id="txt-yearlyDeposit">$24,000</span>
+                                </label>
+                                <input type="range" id="sld-yearlyDeposit" min="0" max="250000" step="1000" class="w-full accent-emerald-500" />
+                            </div>
+                            <div class="pt-2">
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 flex justify-between">
+                                    Years to Goal <span id="txt-yearsLeft">15 yrs (Age 65)</span>
+                                </label>
+                                <input type="range" id="sld-yearsLeft" min="1" max="40" class="w-full accent-emerald-500" />
+                            </div>
+                            <div class="pt-4 border-t border-slate-100">
+                                <label class="text-xs font-semibold text-slate-500 uppercase mb-2 flex justify-between">Target Wealth Goal</label>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-slate-400 font-medium">$</span>
+                                    <input type="number" id="inp-targetWealth" step="100000" class="w-full bg-slate-50 border border-slate-200 rounded-lg p-2 text-slate-800 font-semibold focus:outline-none focus:border-emerald-500 transition-colors" />
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 shadow-sm p-6 flex flex-col justify-between">
+                        <div class="flex justify-between items-start mb-6">
+                            <div>
+                                <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider flex items-center gap-2">
+                                    <i class="ph-bold ph-trend-up"></i> Compound Horizon Projection
+                                </h3>
+                                <p class="text-xs text-slate-400 mt-1" id="txt-startingPrin">Starting Principal: $2.50M</p>
+                            </div>
+                            <div class="text-right">
+                                <div class="text-sm text-slate-500">Projected Future Value</div>
+                                <div class="text-3xl font-bold text-emerald-600" id="txt-futureValue">$0.00M</div>
+                            </div>
+                        </div>
+                        <div class="h-64 mt-4 relative w-full">
+                            <canvas id="chart-wealth"></canvas>
+                        </div>
+                        <div class="mt-6 flex flex-col gap-2 border-t border-slate-100 pt-4">
+                            <div class="flex items-center justify-between">
+                                <div class="text-sm text-slate-500" id="txt-wealthCapLabel">Wealth Capacity Score (vs $5.0M Target)</div>
+                                <span class="font-bold text-slate-800" id="txt-wealthScore">100/100</span>
+                            </div>
+                            <div class="w-full h-3 bg-slate-100 rounded-full overflow-hidden">
+                                <div id="bar-wealthScore" class="h-full bg-emerald-500 rounded-full transition-all duration-1000" style="width: 100%"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 4: NOWGEVITY -->
+            <div id="tab-nowgevity" class="tab-content space-y-6">
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 row-span-2">
+                        <div class="flex justify-between items-start mb-6">
+                            <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider">The Brown Resilience Survey</h3>
+                            <div class="science-tooltip group relative inline-flex items-center justify-center ml-2 cursor-help">
+                                <i class="ph-bold ph-info text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
+                                <div class="tooltip-text w-72 p-4 bg-slate-900 text-white text-xs rounded-xl shadow-xl">
+                                    <div class="font-semibold text-emerald-400 mb-1.5">Brené Brown Methodology</div>
+                                    <div class="text-slate-300 leading-relaxed mb-2">True resilience isn't ignoring stress; it's active coping. Vulnerability is the birthplace of joy.</div>
+                                    <div class="text-slate-500 italic text-[10px] text-right border-t border-slate-800 pt-2">— Ref: Dr. Brené Brown</div>
+                                    <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-8">
+                            <div class="flex justify-between items-end mb-2">
+                                <h4 class="font-bold text-slate-800">Stress Navigation</h4>
+                                <span class="text-xl font-light text-emerald-500" id="txt-stressScore">7.0/10</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100" id="survey-stress"></div>
+                        </div>
+                        <div>
+                            <div class="flex justify-between items-end mb-2">
+                                <h4 class="font-bold text-slate-800">Vulnerability & Wholeheartedness</h4>
+                                <span class="text-xl font-light text-rose-500" id="txt-vulnScore">6.0/10</span>
+                            </div>
+                            <div class="bg-slate-50 rounded-xl p-4 border border-slate-100" id="survey-vuln"></div>
+                        </div>
+                    </div>
+
+                    <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6">
+                        <h3 class="text-sm font-semibold text-slate-500 uppercase tracking-wider mb-6 flex items-center gap-2">
+                            <i class="ph-bold ph-users"></i> Relational Anchor Assessment
+                        </h3>
+                        <p class="text-sm text-slate-600 mb-6 leading-relaxed">Strong social ties are biologically protective. Rate the frequency and depth of your connections.</p>
+                        <div class="space-y-3 mb-8">
+                            <!-- Hardcoded anchors -->
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex items-start gap-3"><div class="p-2 bg-white rounded-lg shadow-sm text-blue-500"><i class="ph-bold ph-calendar"></i></div><div class="text-sm font-medium text-slate-700 pt-1">Deep conversation with partner/close friend</div></div>
+                                <select class="bg-white border border-slate-200 text-xs font-semibold text-slate-600 rounded-md px-2 py-1 outline-none"><option>Met target</option><option>Needs focus</option></select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex items-start gap-3"><div class="p-2 bg-white rounded-lg shadow-sm text-blue-500"><i class="ph-bold ph-calendar"></i></div><div class="text-sm font-medium text-slate-700 pt-1">Engaged in a shared hobby/group</div></div>
+                                <select class="bg-white border border-slate-200 text-xs font-semibold text-slate-600 rounded-md px-2 py-1 outline-none"><option>Met target</option><option>Needs focus</option></select>
+                            </div>
+                            <div class="flex items-center justify-between p-3 bg-slate-50 rounded-xl border border-slate-100">
+                                <div class="flex items-start gap-3"><div class="p-2 bg-white rounded-lg shadow-sm text-blue-500"><i class="ph-bold ph-calendar"></i></div><div class="text-sm font-medium text-slate-700 pt-1">Hosted/attended a dinner or gathering</div></div>
+                                <select class="bg-white border border-slate-200 text-xs font-semibold text-slate-600 rounded-md px-2 py-1 outline-none"><option>Met target</option><option>Needs focus</option></select>
+                            </div>
+                        </div>
+
+                        <div class="border-t border-slate-100 pt-6">
+                            <h4 class="text-sm font-bold text-slate-800 flex items-center gap-2 mb-2">
+                                <i class="ph-fill ph-lightbulb text-emerald-500"></i> Relational Anchor Purpose Finder
+                            </h4>
+                            <p class="text-xs text-slate-500 mb-4">Find an anchor you can show up for consistently without unreasonable sacrifice.</p>
+                            <div class="space-y-4">
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-600 block mb-1">What environment naturally recharges you?</label>
+                                    <select id="sel-purposeEnv" class="w-full bg-slate-50 border border-slate-200 text-sm text-slate-700 rounded-lg p-2.5 outline-none focus:border-emerald-500">
+                                        <option value="">Select an environment...</option>
+                                        <option value="1on1">Quiet, focused 1-on-1 time</option>
+                                        <option value="groups">Small, familiar group gatherings</option>
+                                        <option value="nature">Active outdoor or nature-based settings</option>
+                                        <option value="learning">Structured learning (workshops, talks)</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="text-xs font-semibold text-slate-600 block mb-1">What is a realistic time commitment?</label>
+                                    <select id="sel-purposeTime" class="w-full bg-slate-50 border border-slate-200 text-sm text-slate-700 rounded-lg p-2.5 outline-none focus:border-emerald-500">
+                                        <option value="">Select a commitment...</option>
+                                        <option value="weekly">1-2 Hours / Week</option>
+                                        <option value="monthly">1 Evening or Afternoon / Month</option>
+                                        <option value="quarterly">1 Full Weekend / Quarter</option>
+                                    </select>
+                                </div>
+                                <div id="purpose-suggestion-box" class="mt-4 p-4 bg-emerald-50 border border-emerald-100 rounded-xl hidden animate-in fade-in zoom-in-95">
+                                    <div class="text-xs font-bold text-emerald-600 uppercase tracking-wider mb-1 flex items-center gap-1">
+                                        <i class="ph-fill ph-check-circle"></i> Suggested Anchor
+                                    </div>
+                                    <p class="text-sm text-emerald-900 font-medium" id="txt-purposeSuggestion"></p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-emerald-50 border border-emerald-100 rounded-2xl shadow-sm p-6 lg:col-span-2">
+                        <div class="flex gap-4 items-center">
+                            <div class="p-3 bg-emerald-100 rounded-xl text-emerald-600"><i class="ph-fill ph-brain text-2xl"></i></div>
+                            <div>
+                                <h4 class="font-bold text-emerald-900">Nowgevity Synthesis</h4>
+                                <p class="text-sm text-emerald-700 mt-1">
+                                    Your high stress navigation score (<span id="txt-synthStress">7.0</span>) combined with active boundary setting is currently buffering your physiological allostatic load, directly protecting your heart rate variability.
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 5: HABIT BUILDER -->
+            <div id="tab-habits" class="tab-content space-y-6">
+                <div id="habits-empty" class="flex flex-col items-center justify-center py-20 hidden">
+                    <div class="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mb-6">
+                        <i class="ph-bold ph-list-checks text-4xl text-slate-400"></i>
+                    </div>
+                    <h2 class="text-2xl font-bold text-slate-800 mb-2">No Active Habits</h2>
+                    <p class="text-slate-500 text-center max-w-md">Head over to the Executive Sync tab to identify and select the specific Longevity and Nowgevity habits you want to focus on.</p>
+                </div>
+                <div id="habits-content" class="hidden">
+                    <div class="mb-8">
+                        <h2 class="text-2xl font-bold text-slate-900 flex items-center gap-3">
+                            <i class="ph-bold ph-target text-emerald-500 text-2xl"></i> The Habit Architecture
+                        </h2>
+                        <p class="text-slate-500 mt-2">Willpower is finite. Systems are infinite. Define the psychological loop for your selected protocols.</p>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="habits-grid">
+                        <!-- Populated by JS -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- TAB 6: MEET NUDGE -->
+            <div id="tab-meetnudge" class="tab-content">
+                <div class="max-w-3xl mx-auto py-12 px-4">
+                    <div class="w-20 h-20 bg-slate-900 rounded-2xl flex items-center justify-center mx-auto mb-10 shadow-xl">
+                        <span class="text-white font-bold text-4xl tracking-tighter">N</span>
+                    </div>
+                    <div class="prose prose-lg prose-slate mx-auto text-center space-y-8">
+                        <p class="text-2xl font-light text-slate-800 leading-relaxed">Modern health has become a circus of clout and click farming. <span class="font-semibold">We’re opting out.</span></p>
+                        <p class="text-slate-600 leading-loose">We are trading the hollow "showing off" of the digital age for the humble act of showing up.</p>
+                        <p class="text-slate-600 leading-loose">Longevity isn't a hack; it’s a process fueled by intention and sacrifice, big and small. That can feel daunting, confusing and all together too much. To be truly engaged, we also need to focus on <span class="font-semibold text-rose-500">Nowgevity</span> — the power and fun of living well now.</p>
+                        <p class="text-slate-600 leading-loose">We choose all of this over the distraction of the next trend, and instead of enriching another influencers life, we enrich our own.</p>
+                        <div class="pt-8 border-t border-slate-200 mt-12">
+                            <p class="text-xl font-medium text-emerald-600">Join Nudge, a community where camaraderie replaces clout, consistency replaces hope and we discover <span class="font-bold">The Art & Science of Showing Up.</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- MAIN SCRIPT -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAuth, signInWithCustomToken, signInAnonymously, onAuthStateChanged, signInWithEmailAndPassword, createUserWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, setDoc, onSnapshot } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
+
+        // Firebase Init
+        const firebaseConfigStr = typeof __firebase_config !== 'undefined' ? __firebase_config : '{}';
+        const firebaseConfig = JSON.parse(firebaseConfigStr);
+        const app = Object.keys(firebaseConfig).length > 0 ? initializeApp(firebaseConfig) : null;
+        const auth = app ? getAuth(app) : null;
+        const db = app ? getFirestore(app) : null;
+        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
+
+        // Constants & Data
+        const HABITS = {
+            longevity_today: { id: 'longevity_today', title: 'Morning Hydration Protocol', category: 'Longevity (Today)', desc: 'Drink 16oz of water with electrolytes immediately upon waking.', cue: 'Your morning alarm goes off and feet hit the floor.', response: 'Drink the glass of water placed on your nightstand the night before.', reward: 'Immediate energy spike and cellular rehydration.' },
+            longevity_week: { id: 'longevity_week', title: 'Zone 2 Cardio Base', category: 'Longevity (Week)', desc: 'Complete three 45-minute sessions of Zone 2 steady-state cardio.', cue: 'End of your workday commute or closing your laptop at 5 PM.', response: 'Change immediately into workout gear and start moving.', reward: 'Endorphin release and dedicated time for podcasts/audiobooks.' },
+            longevity_month: { id: 'longevity_month', title: 'Biomarker Diagnostics', category: 'Longevity (Month)', desc: 'Schedule comprehensive bloodwork (ApoB, HbA1c, Vit D).', cue: 'Flipping the calendar to the 1st of the new month.', response: 'Log into your health portal and book a lab appointment.', reward: 'Peace of mind and data-driven confidence in your protocol.' },
+            nowgevity_today: { id: 'nowgevity_today', title: 'Mindful Transition', category: 'Nowgevity (Today)', desc: '10 minutes of box breathing before starting deep work.', cue: 'Sitting at your desk before opening your primary applications.', response: 'Close eyes, inhale for 4s, hold 4s, exhale 4s, hold 4s.', reward: 'Lowered cortisol and a state of calm, focused engagement.' },
+            nowgevity_week: { id: 'nowgevity_week', title: 'Unplugged Relational Anchor', category: 'Nowgevity (Week)', desc: 'One completely unplugged evening with family or friends.', cue: 'Friday at 6:00 PM.', response: 'Place your phone in a drawer in another room.', reward: 'Deep, uninterrupted connection and genuine laughter.' },
+            nowgevity_month: { id: 'nowgevity_month', title: 'Micro-Adventure', category: 'Nowgevity (Month)', desc: 'Plan a novel day-trip or experience outside your routine.', cue: 'The last Sunday evening of the month.', response: 'Text a friend/partner to block off a Saturday for exploring.', reward: 'Excitement, breaking the routine, and creating a core memory.' }
+        };
+
+        const BIOMARKERS = [
+            { id: 'vitaminD', label: 'Vitamin D', unit: 'nmol/L', title: 'Hormonal Foundation', content: 'Crucial for bone density and immunity.', author: 'Protocol' },
+            { id: 'hba1c', label: 'HbA1c', unit: '%', title: 'Glycation Stress', content: 'Measures advanced glycation end-products.', author: 'Protocol' },
+            { id: 'apob', label: 'ApoB', unit: 'mg/dL', title: 'Atherogenic Load', content: 'The absolute best predictor of cardiovascular risk.', author: 'Protocol' },
+            { id: 'vo2max', label: 'VO2 Max', unit: 'mL/kg/min', title: 'Mitochondrial Capacity', content: 'Strong predictor of all-cause mortality.', author: 'Protocol' }
+        ];
+
+        const defaultData = {
+            chronoAge: 50, bioAge: 42, protein: 165,
+            netWorth: 2500000, 
+            vitaminD: 125, hba1c: 4.9, apob: 78, vo2max: 52,
+            sleep: 7.2, hydration: 2.8, steps: 11402, hrv: 68,
+            activeHabits: [],
+            wealthSurvey: { equities: 60, fixed: 30, cash: 10, returnRate: 7, yearlyDeposit: 24000, yearsLeft: 15, targetWealth: 5000000 },
+            resilienceSurvey: { s1: 7, s2: 6, s3: 8, v1: 5, v2: 6, v3: 7 }
+        };
+
+        let appData = JSON.parse(JSON.stringify(defaultData));
+        let currentUser = null;
+        let dataLoaded = false;
+        let syncTimeout = null;
+        
+        // Chart Instances
+        let longevityChart, nowgevityChart, wealthChart;
+
+        // Custom Chart Plugin for Center Text
+        const centerTextPlugin = {
+            id: 'centerText',
+            beforeDraw: function(chart) {
+                if (chart.config.options.elements.center) {
+                    var ctx = chart.ctx;
+                    var centerConfig = chart.config.options.elements.center;
+                    var fontStyle = centerConfig.fontStyle || 'sans-serif';
+                    var txt = centerConfig.text;
+                    var color = centerConfig.color || '#000';
+                    var sidePadding = centerConfig.sidePadding || 20;
+                    var sidePaddingCalculated = (sidePadding / 100) * (chart.innerRadius * 2)
+                    ctx.font = "300 48px " + fontStyle;
+                    var stringWidth = ctx.measureText(txt).width;
+                    var elementWidth = (chart.innerRadius * 2) - sidePaddingCalculated;
+                    var widthRatio = elementWidth / stringWidth;
+                    var newFontSize = Math.floor(30 * widthRatio);
+                    var elementHeight = (chart.innerRadius * 2);
+                    var fontSizeToUse = Math.min(newFontSize, elementHeight, 56);
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    var centerX = ((chart.chartArea.left + chart.chartArea.right) / 2);
+                    var centerY = ((chart.chartArea.top + chart.chartArea.bottom) / 2);
+                    ctx.font = "300 " + fontSizeToUse + "px " + fontStyle;
+                    ctx.fillStyle = color;
+                    ctx.fillText(txt, centerX, centerY);
+                }
+            }
+        };
+        Chart.register(centerTextPlugin);
+
+        // --- Core Functions ---
+
+        function showToast(msg) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-msg').innerText = msg;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.remove('opacity-0'), 10);
+            setTimeout(() => {
+                toast.classList.add('opacity-0');
+                setTimeout(() => toast.classList.add('hidden'), 300);
+            }, 3000);
+        }
+
+        function setSyncStatus(status) {
+            const el = document.getElementById('sync-status');
+            if (status === 'Syncing') {
+                el.innerHTML = '<i class="ph ph-arrows-clockwise animate-spin text-emerald-500"></i> Syncing...';
+            } else if (status === 'Saved') {
+                el.innerHTML = '<i class="ph ph-check text-emerald-500"></i> Saved';
+            } else if (status === 'Error') {
+                el.innerHTML = '<i class="ph ph-warning text-rose-500"></i> Error';
+            }
+        }
+
+        function updateData(newData) {
+            // Deep merge logic specific to our state
+            if (newData.wealthSurvey) appData.wealthSurvey = { ...appData.wealthSurvey, ...newData.wealthSurvey };
+            else if (newData.resilienceSurvey) appData.resilienceSurvey = { ...appData.resilienceSurvey, ...newData.resilienceSurvey };
+            else appData = { ...appData, ...newData };
+
+            refreshUI();
+
+            if (currentUser && dataLoaded && db) {
+                setSyncStatus('Syncing');
+                clearTimeout(syncTimeout);
+                syncTimeout = setTimeout(() => {
+                    const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'sync');
+                    setDoc(docRef, appData, { merge: true })
+                        .then(() => { setSyncStatus('Saved'); })
+                        .catch(err => { console.error(err); setSyncStatus('Error'); });
+                }, 500); // Debounce
+            }
+        }
+
+        function toggleHabit(habitId) {
+            const current = appData.activeHabits || [];
+            if (current.includes(habitId)) {
+                updateData({ activeHabits: current.filter(id => id !== habitId) });
+            } else {
+                updateData({ activeHabits: [...current, habitId] });
+            }
+        }
+
+        // --- UI Updaters ---
+
+        function renderExecutiveTab() {
+            const lScore = Math.min(100, Math.max(0, Math.round(85 + ((appData.chronoAge - appData.bioAge) * 1.5))));
+            const nScore = Math.min(100, Math.max(0, Math.round(40 + (appData.resilienceSurvey.s1 * 2) + (appData.resilienceSurvey.v1 * 2) + (appData.sleep * 2))));
+
+            const updateChart = (chartVar, id, score, color) => {
+                const data = {
+                    datasets: [{
+                        data: [score, 100 - score],
+                        backgroundColor: [color, '#f1f5f9'],
+                        borderWidth: 0,
+                        cutout: '80%'
+                    }]
+                };
+                if (!window[chartVar]) {
+                    const ctx = document.getElementById(id).getContext('2d');
+                    window[chartVar] = new Chart(ctx, {
+                        type: 'doughnut', data: data,
+                        options: {
+                            responsive: true, maintainAspectRatio: false, animation: false,
+                            plugins: { tooltip: { enabled: false }, legend: { display: false } },
+                            elements: { center: { text: score.toString(), color: '#0f172a', fontStyle: 'Inter' } }
+                        }
+                    });
+                } else {
+                    window[chartVar].data = data;
+                    window[chartVar].options.elements.center.text = score.toString();
+                    window[chartVar].update();
+                }
+            };
+
+            updateChart('longevityChart', 'chart-longevity', lScore, '#10b981');
+            updateChart('nowgevityChart', 'chart-nowgevity', nScore, '#f43f5e');
+
+            const renderHabitCard = (key) => {
+                const habit = HABITS[key];
+                const isChecked = appData.activeHabits.includes(habit.id);
+                const bgClass = isChecked ? 'bg-emerald-50 border-emerald-200' : 'bg-slate-50 border-slate-200 hover:border-slate-300';
+                const btnClass = isChecked ? 'bg-emerald-500 text-white' : 'bg-white text-slate-500 border border-slate-200 hover:bg-slate-100';
+                const icon = isChecked ? 'ph-fill ph-check-circle' : 'ph-bold ph-plus-square';
+                const btnText = isChecked ? 'Building' : 'Build Habit';
+                const textClass = isChecked ? 'text-emerald-900' : 'text-slate-800';
+
+                return `
+                    <div class="p-4 rounded-xl border transition-all ${bgClass}">
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="text-xs font-bold text-slate-400 uppercase tracking-wider">${habit.category}</div>
+                            <button onclick="window.toggleHabit('${habit.id}')" class="flex items-center gap-1.5 text-xs font-semibold px-2 py-1 rounded-md transition-colors ${btnClass}">
+                                <i class="${icon}"></i> ${btnText}
+                            </button>
+                        </div>
+                        <h4 class="font-semibold mb-1 ${textClass}">${habit.title}</h4>
+                        <p class="text-sm text-slate-600 leading-snug">${habit.desc}</p>
+                    </div>`;
+            };
+
+            document.getElementById('exec-longevity-habits').innerHTML = ['longevity_today', 'longevity_week', 'longevity_month'].map(renderHabitCard).join('');
+            document.getElementById('exec-nowgevity-habits').innerHTML = ['nowgevity_today', 'nowgevity_week', 'nowgevity_month'].map(renderHabitCard).join('');
+        }
+
+        function renderLongevityTab() {
+            // Inputs avoid recreating to maintain focus if user is typing
+            const ids = ['inp-chronoAge', 'inp-bioAge'];
+            ids.forEach(id => {
+                const el = document.getElementById(id);
+                if (document.activeElement !== el) el.value = appData[id.replace('inp-', '')];
+            });
+
+            const ageDelta = appData.chronoAge - appData.bioAge;
+            document.getElementById('txt-ageDelta').innerHTML = `${ageDelta > 0 ? '-' : '+'}${Math.abs(ageDelta)} <span class="text-xl text-slate-400 font-normal">yrs</span>`;
+
+            // Render Biomarkers
+            let bioHtml = '';
+            BIOMARKERS.forEach(b => {
+                const val = appData[b.id];
+                let status = 'optimal';
+                if(b.id === 'vitaminD') status = val > 100 ? 'optimal' : 'warning';
+                if(b.id === 'hba1c') status = val < 5.4 ? 'optimal' : val < 5.8 ? 'warning' : 'critical';
+                if(b.id === 'apob') status = val < 80 ? 'optimal' : val < 100 ? 'warning' : 'critical';
+                if(b.id === 'vo2max') status = val > 45 ? 'optimal' : val > 35 ? 'warning' : 'critical';
+
+                let colorClass = status === 'optimal' ? 'text-emerald-600 border-emerald-200 focus:border-emerald-500' :
+                                 status === 'warning' ? 'text-amber-600 border-amber-200 focus:border-amber-500' :
+                                 'text-rose-600 border-rose-200 focus:border-rose-500';
+
+                bioHtml += `
+                    <div class="flex flex-col space-y-1">
+                        <div class="flex items-center justify-between">
+                            <label class="text-sm font-medium text-slate-600 flex items-center">
+                                ${b.label}
+                                <div class="science-tooltip group relative inline-flex items-center justify-center ml-2 cursor-help">
+                                    <i class="ph-bold ph-info text-slate-400 group-hover:text-emerald-500 transition-colors"></i>
+                                    <div class="tooltip-text w-64 p-3 bg-slate-900 text-white text-xs rounded-xl shadow-xl">
+                                        <div class="font-semibold text-emerald-400 mb-1">${b.title}</div>
+                                        <div class="text-slate-300 leading-relaxed">${b.content}</div>
+                                        <div class="absolute top-full left-1/2 -translate-x-1/2 border-4 border-transparent border-t-slate-900"></div>
+                                    </div>
+                                </div>
+                            </label>
+                            <span class="text-xs font-semibold uppercase tracking-wider text-slate-400">${b.unit}</span>
+                        </div>
+                        <input type="number" data-bio="${b.id}" class="bio-input w-full bg-slate-50 border rounded-lg px-3 py-2 text-lg font-semibold outline-none transition-colors ${colorClass}" value="${val}" />
+                    </div>`;
+            });
+            const grid = document.getElementById('biomarkers-grid');
+            // Only update if not focused inside
+            if (!grid.contains(document.activeElement)) {
+                grid.innerHTML = bioHtml;
+                document.querySelectorAll('.bio-input').forEach(input => {
+                    input.addEventListener('change', (e) => {
+                        updateData({ [e.target.dataset.bio]: Number(e.target.value) });
+                    });
+                });
+            }
+
+            document.getElementById('txt-protein').innerText = appData.protein;
+            document.getElementById('bar-protein').style.width = `${Math.min((appData.protein / 213) * 100, 100)}%`;
+        }
+
+        function renderWealthTab() {
+            const ws = appData.wealthSurvey;
+            
+            // Safe update for inputs
+            const safeUpdate = (id, val) => {
+                const el = document.getElementById(id);
+                if (document.activeElement !== el) el.value = val;
+            };
+
+            safeUpdate('inp-netWorth', appData.netWorth);
+            safeUpdate('inp-equities', ws.equities);
+            safeUpdate('inp-fixed', ws.fixed);
+            safeUpdate('inp-cash', ws.cash);
+            safeUpdate('sld-returnRate', ws.returnRate);
+            safeUpdate('sld-yearlyDeposit', ws.yearlyDeposit);
+            safeUpdate('sld-yearsLeft', ws.yearsLeft);
+            safeUpdate('inp-targetWealth', ws.targetWealth);
+
+            document.getElementById('txt-returnRate').innerText = `${ws.returnRate}%`;
+            document.getElementById('txt-yearlyDeposit').innerText = `$${ws.yearlyDeposit.toLocaleString()}`;
+            document.getElementById('txt-yearsLeft').innerText = `${ws.yearsLeft} yrs (Age ${appData.chronoAge + ws.yearsLeft})`;
+
+            const allocTotal = ws.equities + ws.fixed + ws.cash;
+            const errEl = document.getElementById('alloc-error');
+            if (allocTotal !== 100) errEl.classList.remove('hidden');
+            else errEl.classList.add('hidden');
+
+            // Risk calculation
+            const expectedReturn = ((ws.equities / 100) * 9.0) + ((ws.fixed / 100) * 4.5) + ((ws.cash / 100) * 2.5);
+            const returnGap = ws.returnRate - expectedReturn;
+            let riskLevel = 'LOW RISK', riskClass = 'bg-emerald-100 text-emerald-700 border-emerald-200';
+            if (returnGap > 2) { riskLevel = 'HIGH RISK'; riskClass = 'bg-rose-100 text-rose-700 border-rose-200'; }
+            else if (returnGap > 0) { riskLevel = 'MED RISK'; riskClass = 'bg-amber-100 text-amber-700 border-amber-200'; }
+            
+            const badge = document.getElementById('risk-badge');
+            badge.className = `px-1.5 py-0.5 rounded text-[9px] font-bold border tracking-wider uppercase cursor-help ${riskClass}`;
+            badge.innerText = riskLevel;
+            badge.title = `Historical weighted return for this allocation is ~${expectedReturn.toFixed(1)}%`;
+
+            // Simulation
+            const dataPts = [];
+            const labels = [];
+            let principal = appData.netWorth;
+            const r = ws.returnRate / 100;
+            for (let i = 0; i <= ws.yearsLeft; i++) {
+                dataPts.push(principal);
+                labels.push(`Year ${i}`);
+                principal = (principal * (1 + r)) + ws.yearlyDeposit;
+            }
+            const projectedTarget = dataPts[dataPts.length - 1] || 0;
+            const targetW = ws.targetWealth || 5000000;
+            const wealthScore = Math.min(100, Math.round((projectedTarget / targetW) * 100));
+
+            document.getElementById('txt-startingPrin').innerText = `Starting Principal: $${(appData.netWorth/1000000).toFixed(2)}M`;
+            document.getElementById('txt-futureValue').innerText = `$${(projectedTarget/1000000).toFixed(2)}M`;
+            document.getElementById('txt-wealthCapLabel').innerText = `Wealth Capacity Score (vs $${(targetW/1000000).toFixed(1)}M Target)`;
+            document.getElementById('txt-wealthScore').innerText = `${wealthScore}/100`;
+            document.getElementById('bar-wealthScore').style.width = `${Math.min(wealthScore, 100)}%`;
+
+            // Update Chart.js Area Chart
+            if (!wealthChart) {
+                const ctx = document.getElementById('chart-wealth').getContext('2d');
+                let gradient = ctx.createLinearGradient(0, 0, 0, 400);
+                gradient.addColorStop(0, 'rgba(16, 185, 129, 0.4)');
+                gradient.addColorStop(1, 'rgba(16, 185, 129, 0)');
+
+                wealthChart = new Chart(ctx, {
+                    type: 'line',
+                    data: {
+                        labels: labels,
+                        datasets: [{
+                            data: dataPts,
+                            borderColor: '#10b981', borderWidth: 3,
+                            backgroundColor: gradient, fill: true,
+                            tension: 0.4, pointRadius: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true, maintainAspectRatio: false, animation: false,
+                        plugins: { 
+                            legend: { display: false },
+                            tooltip: { 
+                                callbacks: { label: function(context) { return '$' + (context.parsed.y/1000000).toFixed(2) + 'M'; } }
+                            }
+                        },
+                        scales: {
+                            x: { grid: { display: false }, ticks: { maxTicksLimit: 6, color: '#94a3b8' } },
+                            y: { display: false, min: 0 }
+                        }
+                    }
+                });
+            } else {
+                wealthChart.data.labels = labels;
+                wealthChart.data.datasets[0].data = dataPts;
+                wealthChart.update();
+            }
+        }
+
+        function renderNowgevityTab() {
+            const rs = appData.resilienceSurvey;
+            
+            const stressScore = ((rs.s1 + rs.s2 + rs.s3) / 3).toFixed(1);
+            const vulnScore = ((rs.v1 + rs.v2 + rs.v3) / 3).toFixed(1);
+            document.getElementById('txt-stressScore').innerText = `${stressScore}/10`;
+            document.getElementById('txt-vulnScore').innerText = `${vulnScore}/10`;
+            document.getElementById('txt-synthStress').innerText = stressScore;
+
+            const renderSurveyGroup = (questions, prefix) => {
+                return questions.map((q, i) => {
+                    const field = `${prefix}${i+1}`;
+                    return `
+                        <div class="py-4 border-b border-slate-100 last:border-0">
+                            <div class="flex justify-between items-center mb-3">
+                                <label class="text-sm text-slate-700 font-medium pr-4">${q}</label>
+                                <span class="text-lg font-bold text-emerald-600 w-8 text-right">${rs[field]}</span>
+                            </div>
+                            <input type="range" data-rs="${field}" min="1" max="10" value="${rs[field]}" class="survey-input w-full accent-emerald-500" />
+                            <div class="flex justify-between text-[10px] text-slate-400 mt-1 uppercase font-semibold"><span>Rarely</span><span>Always</span></div>
+                        </div>`;
+                }).join('');
+            };
+
+            const stressQs = ["I can clearly identify and name my emotions when stressed.", "I set and maintain clear boundaries to protect my energy.", "I view setbacks as data points rather than personal failures."];
+            const vulnQs = ["I am comfortable sharing my unpolished, true self with my inner circle.", "I lean into joy even when I feel uncertain about the future.", "I ask for help without feeling like it diminishes my worth."];
+            
+            const stressEl = document.getElementById('survey-stress');
+            const vulnEl = document.getElementById('survey-vuln');
+            
+            if (!stressEl.contains(document.activeElement)) {
+                stressEl.innerHTML = renderSurveyGroup(stressQs, 's');
+                vulnEl.innerHTML = renderSurveyGroup(vulnQs, 'v');
+                
+                document.querySelectorAll('.survey-input').forEach(input => {
+                    input.addEventListener('input', (e) => {
+                        updateData({ resilienceSurvey: { [e.target.dataset.rs]: Number(e.target.value) } });
+                    });
+                });
+            }
+
+            updatePurposeFinder();
+        }
+
+        function updatePurposeFinder() {
+            const env = document.getElementById('sel-purposeEnv').value;
+            const time = document.getElementById('sel-purposeTime').value;
+            const box = document.getElementById('purpose-suggestion-box');
+            const txt = document.getElementById('txt-purposeSuggestion');
+            
+            if (env && time) {
+                let text = "Block out specific calendar time for a hobby that naturally involves interacting with others sharing that interest.";
+                if (env === '1on1' && time === 'weekly') text = "Schedule a recurring weekly 45-minute coffee or walk with a single close friend.";
+                else if (env === 'groups' && time === 'monthly') text = "Join or host a monthly dinner club or board game night with 4-6 people.";
+                else if (env === 'nature' && time === 'weekly') text = "Commit to a Saturday morning local hiking or running club.";
+                else if (env === 'learning' && time === 'monthly') text = "Attend a monthly workshop, lecture series, or book club.";
+                
+                txt.innerText = text;
+                box.classList.remove('hidden');
+            } else {
+                box.classList.add('hidden');
+            }
+        }
+
+        function renderHabitsTab() {
+            const activeIds = appData.activeHabits || [];
+            if (activeIds.length === 0) {
+                document.getElementById('habits-empty').classList.remove('hidden');
+                document.getElementById('habits-content').classList.add('hidden');
+            } else {
+                document.getElementById('habits-empty').classList.add('hidden');
+                document.getElementById('habits-content').classList.remove('hidden');
+                
+                let html = '';
+                activeIds.forEach(id => {
+                    const habit = HABITS[id];
+                    html += `
+                        <div class="bg-white rounded-2xl border border-slate-200 shadow-sm p-6 border-l-4 border-l-emerald-500">
+                            <div class="flex justify-between items-start mb-4">
+                                <div>
+                                    <div class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-1">${habit.category}</div>
+                                    <h3 class="text-lg font-bold text-slate-800">${habit.title}</h3>
+                                </div>
+                                <button onclick="window.toggleHabit('${id}')" class="text-xs text-slate-400 hover:text-rose-500 transition-colors">Remove</button>
+                            </div>
+                            <div class="space-y-4 mt-6">
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <div class="text-xs font-bold text-emerald-600 uppercase mb-1 flex items-center gap-1.5"><i class="ph-bold ph-book-open"></i> 1. The Cue</div>
+                                    <div class="text-sm text-slate-700 font-medium">${habit.cue}</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <div class="text-xs font-bold text-blue-600 uppercase mb-1 flex items-center gap-1.5"><i class="ph-bold ph-activity"></i> 2. The Response</div>
+                                    <div class="text-sm text-slate-700 font-medium">${habit.response}</div>
+                                </div>
+                                <div class="bg-slate-50 p-3 rounded-lg border border-slate-100">
+                                    <div class="text-xs font-bold text-rose-600 uppercase mb-1 flex items-center gap-1.5"><i class="ph-bold ph-heart"></i> 3. The Reward</div>
+                                    <div class="text-sm text-slate-700 font-medium">${habit.reward}</div>
+                                </div>
+                            </div>
+                        </div>`;
+                });
+                document.getElementById('habits-grid').innerHTML = html;
+            }
+        }
+
+        function refreshUI() {
+            renderExecutiveTab();
+            renderLongevityTab();
+            renderWealthTab();
+            renderNowgevityTab();
+            renderHabitsTab();
+        }
+
+        // --- Event Listeners & Bindings ---
+        window.toggleHabit = toggleHabit; // expose for inline onclick
+
+        // Tab Navigation
+        document.querySelectorAll('.tab-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                // Style updates
+                document.querySelectorAll('.tab-btn').forEach(b => {
+                    b.classList.remove('border-emerald-500', 'text-emerald-600');
+                    b.classList.add('border-transparent', 'text-slate-500');
+                });
+                btn.classList.add('border-emerald-500', 'text-emerald-600');
+                btn.classList.remove('border-transparent', 'text-slate-500');
+
+                // Content switching
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                document.getElementById(`tab-${btn.dataset.tab}`).classList.add('active');
+            });
+        });
+
+        // Longevity Binds
+        document.getElementById('inp-chronoAge').addEventListener('change', e => updateData({ chronoAge: Number(e.target.value) }));
+        document.getElementById('inp-bioAge').addEventListener('change', e => updateData({ bioAge: Number(e.target.value) }));
+        document.getElementById('btn-prot-25').addEventListener('click', () => updateData({ protein: Math.min(appData.protein + 25, 300) }));
+        document.getElementById('btn-prot-45').addEventListener('click', () => updateData({ protein: Math.min(appData.protein + 45, 300) }));
+        document.getElementById('btn-prot-reset').addEventListener('click', () => updateData({ protein: 0 }));
+
+        // Wealth Binds
+        ['netWorth', 'equities', 'fixed', 'cash', 'targetWealth'].forEach(id => {
+            document.getElementById(`inp-${id}`).addEventListener('change', e => {
+                if(id === 'netWorth' || id === 'targetWealth') updateData({ [id]: Number(e.target.value) });
+                else updateData({ wealthSurvey: { [id]: Number(e.target.value) } });
+            });
+        });
+        ['returnRate', 'yearlyDeposit', 'yearsLeft'].forEach(id => {
+            document.getElementById(`sld-${id}`).addEventListener('input', e => {
+                updateData({ wealthSurvey: { [id]: Number(e.target.value) } });
+            });
+        });
+
+        // Nowgevity Binds
+        document.getElementById('sel-purposeEnv').addEventListener('change', updatePurposeFinder);
+        document.getElementById('sel-purposeTime').addEventListener('change', updatePurposeFinder);
+
+        // File Upload
+        document.getElementById('upload-btn').addEventListener('click', () => document.getElementById('file-upload').click());
+        document.getElementById('file-upload').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            document.getElementById('parsing-overlay').classList.remove('hidden');
+            document.getElementById('parsing-overlay').classList.add('flex');
+            
+            setTimeout(() => {
+                const isPdf = file.name.toLowerCase().endsWith('.pdf');
+                updateData({
+                    chronoAge: appData.chronoAge, // Trigger update
+                    sleep: isPdf ? 8.1 : 7.5, 
+                    hrv: isPdf ? 72 : 65, 
+                    vitaminD: 140, apob: 72,
+                    resilienceSurvey: { ...appData.resilienceSurvey, s1: 8, s2: 8, s3: 9, v1: 7, v2: 8, v3: 7 }
+                });
+                document.getElementById('parsing-overlay').classList.add('hidden');
+                document.getElementById('parsing-overlay').classList.remove('flex');
+                showToast(`Extracted and synced insights from ${file.name}`);
+                e.target.value = null;
+            }, 2500);
+        });
+
+        // --- Auth Setup ---
+        const authScreen = document.getElementById('auth-screen');
+        const mainApp = document.getElementById('main-app');
+        const overlay = document.getElementById('loading-overlay');
+        let isRegisterMode = false;
+
+        document.getElementById('toggle-auth-mode').addEventListener('click', (e) => {
+            isRegisterMode = !isRegisterMode;
+            e.target.innerText = isRegisterMode ? 'Switch to Login' : 'Create Profile';
+            document.getElementById('auth-btn-text').innerText = isRegisterMode ? 'Join the Community' : 'Sign In';
+        });
+
+        document.getElementById('auth-form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const pass = document.getElementById('auth-password').value;
+            const errDiv = document.getElementById('auth-error');
+            const icon = document.getElementById('auth-btn-icon');
+            
+            errDiv.classList.add('hidden');
+            icon.className = 'ph ph-arrows-clockwise animate-spin';
+            
+            try {
+                if(auth) {
+                    if (isRegisterMode) await createUserWithEmailAndPassword(auth, email, pass);
+                    else await signInWithEmailAndPassword(auth, email, pass);
+                } else { throw new Error("Firebase not configured."); }
+            } catch (err) {
+                document.getElementById('auth-error-msg').innerText = err.message.replace('Firebase: ', '');
+                errDiv.classList.remove('hidden');
+                errDiv.classList.add('flex');
+                icon.className = 'ph-bold ph-lock';
+            }
+        });
+
+        document.getElementById('guest-login-btn').addEventListener('click', () => {
+            if(auth) signInAnonymously(auth);
+            else { currentUser = { uid: 'guest' }; initApp(); } // Mock fallback
+        });
+
+        document.getElementById('logout-btn').addEventListener('click', () => {
+            if(auth) signOut(auth);
+            else { currentUser = null; showAuth(); } // Mock fallback
+        });
+
+        function showAuth() {
+            overlay.classList.add('hidden');
+            authScreen.classList.remove('hidden');
+            mainApp.classList.add('hidden');
+        }
+
+        function initApp() {
+            authScreen.classList.add('hidden');
+            overlay.classList.remove('hidden');
+
+            if (currentUser && currentUser.uid !== 'guest' && db) {
+                const docRef = doc(db, 'artifacts', appId, 'users', currentUser.uid, 'data', 'sync');
+                onSnapshot(docRef, (docSnap) => {
+                    if (docSnap.exists()) {
+                        appData = { ...defaultData, ...docSnap.data() };
+                    } else {
+                        setDoc(docRef, defaultData);
+                        appData = JSON.parse(JSON.stringify(defaultData));
+                    }
+                    dataLoaded = true;
+                    setSyncStatus('Saved');
+                    refreshUI();
+                    mainApp.classList.remove('hidden');
+                    overlay.classList.add('hidden');
+                }, (err) => {
+                    console.error("Sync error", err);
+                    setSyncStatus('Error');
+                });
+            } else {
+                // Guest / No DB mode
+                dataLoaded = true;
+                refreshUI();
+                mainApp.classList.remove('hidden');
+                overlay.classList.add('hidden');
+            }
+        }
+
+        if (auth) {
+            if (typeof __initial_auth_token !== 'undefined' && __initial_auth_token) {
+                signInWithCustomToken(auth, __initial_auth_token).catch(e => console.error(e));
+            }
+            onAuthStateChanged(auth, (user) => {
+                currentUser = user;
+                if (user) initApp();
+                else showAuth();
+            });
+        } else {
+            // No Firebase configured, default to auth screen mock
+            showAuth();
+        }
+    </script>
+</body>
+</html>
