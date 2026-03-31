@@ -33,6 +33,9 @@
             z-index: 20; border-radius: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .matrix-loading-overlay.active { opacity: 1; pointer-events: all; }
+        
+        /* Custom Checkbox Color */
+        .assessment-cb { accent-color: #10b981; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
@@ -153,19 +156,43 @@
                 <p id="journey-subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">Building a formidable physical and financial runway without sacrificing the magic of today.</p>
             </div>
 
-            <!-- Level Selector -->
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-12">
-                <h2 class="text-xl font-bold text-slate-900 text-center mb-2">Let's get started.</h2>
-                <p class="text-slate-500 text-center mb-10 text-sm">Tell me the level you are at today on this journey:</p>
-                <div class="max-w-2xl mx-auto relative px-4 md:px-8">
-                    <input type="range" id="level-slider" min="100" max="500" step="100" value="100" class="level-slider w-full z-10 relative">
-                    <!-- Adjusted responsive text sizing and widths to prevent collision -->
-                    <div class="flex justify-between mt-4 text-[10px] sm:text-xs font-semibold text-slate-400">
-                        <span class="text-center w-12 sm:w-16 -ml-3 sm:-ml-5">100<br/>Newbie</span>
-                        <span class="text-center w-14 sm:w-16">200<br/>Aware</span>
-                        <span class="text-center w-20 sm:w-24">300<br/>Knowledgeable</span>
-                        <span class="text-center w-14 sm:w-16">400<br/>Expert</span>
-                        <span class="text-center w-12 sm:w-16 -mr-3 sm:-mr-5">500<br/>Mastery</span>
+            <!-- Calibration & Level Selector -->
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-12">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-2">Establish Your Baseline</h2>
+                    <p class="text-slate-500 text-sm max-w-xl mx-auto">Be honest. We judge harshly. Let's calibrate the Nudge Engine to your true current habits so we can assign you the correct protocol.</p>
+                </div>
+
+                <!-- Step 1: Assessment -->
+                <div class="mb-10 border-b border-slate-100 pb-10">
+                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Step 1: Calibration Audit</h3>
+                    <div id="assessment-questions" class="space-y-3 mb-6">
+                        <!-- Populated by JS -->
+                    </div>
+                    <div class="flex flex-col sm:flex-row items-center gap-4">
+                        <button id="calculate-level-btn" class="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-md text-sm flex items-center justify-center gap-2">
+                            <i class="ph-bold ph-calculator"></i> Calculate My Level
+                        </button>
+                        <p id="calculation-result" class="text-emerald-600 font-semibold text-sm hidden transition-opacity"></p>
+                    </div>
+                </div>
+
+                <!-- Step 2: Slider -->
+                <div>
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Step 2: Fine-Tune Level</h3>
+                        <span id="current-level-display" class="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">Level 100</span>
+                    </div>
+                    <div class="max-w-2xl mx-auto relative px-4 md:px-8">
+                        <input type="range" id="level-slider" min="100" max="500" step="100" value="100" class="level-slider w-full z-10 relative transition-all duration-300">
+                        <!-- Adjusted responsive text sizing and widths to prevent collision -->
+                        <div class="flex justify-between mt-4 text-[10px] sm:text-xs font-semibold text-slate-400">
+                            <span class="text-center w-12 sm:w-16 -ml-3 sm:-ml-5">100<br/>Newbie</span>
+                            <span class="text-center w-14 sm:w-16">200<br/>Aware</span>
+                            <span class="text-center w-20 sm:w-24">300<br/>Knowledgeable</span>
+                            <span class="text-center w-14 sm:w-16">400<br/>Expert</span>
+                            <span class="text-center w-12 sm:w-16 -mr-3 sm:-mr-5">500<br/>Mastery</span>
+                        </div>
                     </div>
                 </div>
             </section>
@@ -174,7 +201,7 @@
             <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-16">
                 <div class="text-center mb-8">
                     <h2 class="text-2xl font-bold text-slate-900 mb-3">How the System Works</h2>
-                    <p class="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">Now that you've identified where you're at, let's help you get to the next level. Your only job? <strong class="text-slate-900">Show up and do the work.</strong> As you progress, you'll engage in two vital pillars:</p>
+                    <p class="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">Now that your baseline is set, your only job is to <strong class="text-slate-900">show up and do the work.</strong> As you progress, you'll engage in two vital pillars:</p>
                 </div>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -213,7 +240,7 @@
             <!-- The Matrix (Learn / Do) -->
             <section class="mb-16">
                 <div class="flex items-center justify-between mb-6">
-                    <h3 id="matrix-header" class="text-2xl font-bold text-slate-900">Your Path to Level 200</h3>
+                    <h3 id="matrix-header" class="text-2xl font-bold text-slate-900">Your Path to Level 100</h3>
                     <span class="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
                         <i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Nudge Database
                     </span>
@@ -432,6 +459,12 @@
         const longLabel = document.getElementById('long-label');
         const startBtn = document.getElementById('start-journey-btn');
         
+        // Assessment UI
+        const assessmentContainer = document.getElementById('assessment-questions');
+        const calculateBtn = document.getElementById('calculate-level-btn');
+        const calculationResult = document.getElementById('calculation-result');
+        const currentLevelDisplay = document.getElementById('current-level-display');
+
         // Matrix & Journey UI
         const levelSlider = document.getElementById('level-slider');
         const loader = document.getElementById('matrix-loader');
@@ -440,29 +473,23 @@
         let currentJourneyVal = 50;
 
         // ---------------------------------------------------------
-        // LOGIN GATE LOGIC 
+        // LOGIN GATE LOGIC
         // ---------------------------------------------------------
-        // You can set this to the specific URL of a private Google Doc
         const EXPECTED_DOC_LINK = "docs.google.com/document/d/"; 
-        const FALLBACK_PASSWORD = "nudge"; // Basic fallback word
+        const FALLBACK_PASSWORD = "nudge"; 
         
         function handleLogin() {
             const inputVal = passwordInput.value.toLowerCase().trim();
-            
-            // Check if they pasted the doc link OR typed the fallback password
             if (inputVal.includes(EXPECTED_DOC_LINK.toLowerCase()) || inputVal === FALLBACK_PASSWORD) {
-                // Success Transition
                 viewLogin.classList.add('opacity-0');
                 setTimeout(() => {
                     viewLogin.classList.add('hidden');
                     viewOnboarding.classList.remove('hidden');
-                    // Small delay to allow display:block to apply before fading in
                     setTimeout(() => {
                         viewOnboarding.classList.remove('opacity-0');
                     }, 50);
                 }, 500);
             } else {
-                // Error Shake Animation
                 loginError.classList.remove('opacity-0');
                 passwordInput.value = '';
                 passwordInput.classList.add('translate-x-2');
@@ -475,7 +502,7 @@
         loginBtn.addEventListener('click', handleLogin);
         passwordInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter') handleLogin();
-            loginError.classList.add('opacity-0'); // Hide error when typing again
+            loginError.classList.add('opacity-0');
         });
 
         // ---------------------------------------------------------
@@ -513,6 +540,106 @@
         }
 
         // ---------------------------------------------------------
+        // CALIBRATION ENGINE (The 8 Harsh Questions)
+        // ---------------------------------------------------------
+        const ASSESSMENT_QUESTIONS = {
+            0: [
+                "Have you done a basic mental health check-in recently (e.g., with a counselor or self-audit)?",
+                "Do you generally prioritize your mental well-being, take walks, and hang out with friends?",
+                "Have you read seminal books on presence (e.g., Brené Brown, Eckhart Tolle) and know your stress triggers?",
+                "Do you actively and strictly track your digital screen time and enforce tech-free boundaries?",
+                "Do you have a deeply connected, close friend group you prioritize and could talk to about almost anything?",
+                "Do you have a dedicated therapist or relational coach actively engaged in your mental/social wellness plan?",
+                "Are daily mindfulness, joy-sourcing, and nervous-system regulation practices strictly entrenched in your life?",
+                "Are you living at the edge of present-moment mastery (attending intensive retreats, studying with top spiritual guides)?"
+            ],
+            25: [
+                "Have you done basic bloodwork and set up a simple automated savings plan recently?",
+                "Do you use a wearable to monitor your sleep/activity, and generally try to eat well and move daily?",
+                "Have you read key books on balancing life/health, and do you know your basic metabolic markers?",
+                "Do you precisely track your budget and intentionally block off specific calendar time for physical recovery?",
+                "Do you have a close-knit group of friends you prioritize and could talk to about almost anything?",
+                "Have you discussed a holistic, long-term wellness and lifestyle plan with your primary care doctor?",
+                "Is a balanced routine of stress-reduction, light exercise, and intentional spending deeply entrenched in your week?",
+                "Do you actively attend wellness retreats or consult directly with top-tier lifestyle design experts?"
+            ],
+            50: [
+                "Have you recently done baseline bloodwork and basic financial planning questionnaires?",
+                "Do you wear a fitness tracker (Oura, Apple Watch, Garmin) and generally work out and eat well?",
+                "Have you read the seminal books on this topic (e.g., Peter Attia's 'Outlive') and know your core biomarkers?",
+                "Do you work out and eat in a strictly tracked fashion (e.g., logging macros, specific Zone 2 cardio targets)?",
+                "Do you have a close-knit group of friends you prioritize and could talk to about almost anything?",
+                "Do you have a dedicated medical team or specialist actively engaged in a personalized health plan with you?",
+                "Is your tailored exercise, nutrition, and curated supplement protocol deeply entrenched into your daily life?",
+                "Are you living at the absolute edge of this space (attending longevity conferences, working with top experts)?"
+            ],
+            75: [
+                "Have you recently completed comprehensive bloodwork (including ApoB) and mapped your long-term wealth trajectory?",
+                "Do you wear an advanced tracker, consistently hit your workout macros, and optimize your sleep environment?",
+                "Have you read deeply into longevity science and know your advanced biomarkers (hs-CRP, Homocysteine, VO2 max)?",
+                "Have you used a Continuous Glucose Monitor (CGM) or practice strict, tracked metabolic fasting?",
+                "Do you have a solid network of like-minded, high-performing friends to hold you accountable?",
+                "Do you have a specialized longevity doctor or clinic actively overseeing your physical decline prevention plan?",
+                "Are advanced protocols (tax-loss harvesting, DEXA scans, curated supplement stacks) completely entrenched in your year?",
+                "Are you at the edge of performance science (attending longevity summits, doing epigenetic testing)?"
+            ],
+            100: [
+                "Have you completed exhaustive clinical blood panels and established a ruthless baseline of your net worth?",
+                "Do you track and log almost every biological input (macros, micronutrients, sleep architecture, HRV)?",
+                "Have you read the clinical science of cellular aging and understand mTOR/IGF-1 signaling pathways?",
+                "Have you done comprehensive whole-genome sequencing or epigenetic methylation testing?",
+                "Are you part of a highly specialized, elite community of biohackers or life-extension enthusiasts?",
+                "Do you have a dedicated medical board or family office orchestrating a hyper-personalized life extension protocol?",
+                "Are pharmacological longevity interventions (e.g., off-label Rapamycin, peptides) entrenched in your protocol?",
+                "Are you living at the bleeding edge (funding research, attending elite summits, experimenting with next-gen therapies)?"
+            ]
+        };
+
+        function renderAssessment(journeyVal) {
+            const questions = ASSESSMENT_QUESTIONS[journeyVal];
+            assessmentContainer.innerHTML = ''; 
+            
+            questions.forEach((q, index) => {
+                const label = document.createElement('label');
+                label.className = "flex items-start gap-3 cursor-pointer p-3 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 transition-colors";
+                label.innerHTML = `
+                    <div class="flex items-center h-5 mt-0.5">
+                        <input type="checkbox" class="w-5 h-5 bg-white border-slate-300 rounded assessment-cb cursor-pointer">
+                    </div>
+                    <div class="text-sm text-slate-700 font-medium leading-tight">${q}</div>
+                `;
+                assessmentContainer.appendChild(label);
+            });
+
+            calculationResult.classList.add('hidden');
+            calculationResult.classList.remove('opacity-100');
+        }
+
+        // The Harsh Scoring Logic
+        calculateBtn.addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.assessment-cb');
+            let checkedCount = 0;
+            checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+            
+            let suggestedLevel = 100;
+            if (checkedCount >= 8) suggestedLevel = 500;
+            else if (checkedCount >= 6) suggestedLevel = 400;
+            else if (checkedCount >= 4) suggestedLevel = 300;
+            else if (checkedCount >= 2) suggestedLevel = 200;
+
+            levelSlider.value = suggestedLevel;
+            currentLevelDisplay.textContent = `Level ${suggestedLevel}`;
+            updateMatrix(currentJourneyVal, suggestedLevel);
+
+            calculationResult.textContent = `✓ We've calibrated your start to Level ${suggestedLevel}.`;
+            calculationResult.classList.remove('hidden');
+            setTimeout(() => calculationResult.classList.add('opacity-100'), 50);
+
+            levelSlider.classList.add('scale-[1.02]');
+            setTimeout(() => levelSlider.classList.remove('scale-[1.02]'), 300);
+        });
+
+        // ---------------------------------------------------------
         // ONBOARDING PERSONA ENGINE
         // ---------------------------------------------------------
         const JOURNEYS = {
@@ -543,7 +670,6 @@
                 focusTitle.textContent = personaData[val].title;
                 focusDesc.innerHTML = personaData[val].desc;
                 
-                // Update Icon & Colors
                 focusIcon.className = `ph-fill ${personaData[val].icon} ${personaData[val].color} text-lg`;
                 
                 focusTitleContainer.style.opacity = '1';
@@ -562,13 +688,14 @@
             document.getElementById('journey-subtitle').textContent = journeyData.shortDesc;
             document.getElementById('community-name').textContent = journeyData.name;
             
-            // Set Journey Page Icon & Theme
             const journeyPageIcon = document.getElementById('journey-page-icon');
             const journeyIconContainer = document.getElementById('journey-icon-container');
             journeyPageIcon.className = `ph-fill ${journeyData.icon} text-4xl ${journeyData.colorClass}`;
             journeyIconContainer.className = `w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border ${journeyData.bgClass}`;
 
             document.getElementById('level-slider').value = 100;
+            currentLevelDisplay.textContent = "Level 100";
+            renderAssessment(currentJourneyVal);
             updateMatrix(currentJourneyVal, 100);
 
             viewOnboarding.classList.add('opacity-0');
@@ -660,7 +787,9 @@
         }
 
         levelSlider.addEventListener('input', () => {
-            updateMatrix(currentJourneyVal, parseInt(levelSlider.value));
+            const val = parseInt(levelSlider.value);
+            currentLevelDisplay.textContent = `Level ${val}`;
+            updateMatrix(currentJourneyVal, val);
         });
 
     </script>
