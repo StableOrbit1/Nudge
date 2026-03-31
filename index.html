@@ -5,11 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nudge - The Art & Science of Showing Up</title>
     
+    <!-- Google Fonts & Tailwind -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
+    <!-- Lucide Icons & PapaParse (for reading Google Sheets) -->
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 
@@ -34,8 +36,10 @@
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
 
+    <!-- VIEW 1: ONBOARDING SCREEN -->
     <div id="view-onboarding" class="min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
         <main class="max-w-3xl w-full bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700">
+            <!-- Manifesto -->
             <section class="px-8 pt-12 pb-8 text-center border-b border-slate-100">
                 <div class="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-6">
                     <span class="text-white font-bold text-3xl tracking-tighter">N</span>
@@ -49,6 +53,7 @@
                 </div>
             </section>
 
+            <!-- Slider -->
             <section class="px-8 py-10 bg-slate-50/50">
                 <div class="flex justify-between items-end mb-4">
                     <div class="flex flex-col items-start">
@@ -78,6 +83,7 @@
                 </div>
             </section>
 
+            <!-- Persona Engine -->
             <section class="px-8 py-10 border-t border-slate-100 text-center">
                 <div class="inline-block mb-4 px-4 py-1.5 bg-slate-100 rounded-full">
                     <h3 class="text-sm font-bold text-slate-800 fade-text" id="focus-title">Your Journey Focus: 50% Longevity / 50% Nowgevity</h3>
@@ -93,23 +99,28 @@
         </main>
     </div>
 
+    <!-- VIEW 2: PROGRESSIVE JOURNEY PAGE -->
     <div id="view-journey" class="hidden min-h-screen pb-20 transition-opacity duration-500">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
                 <button id="back-btn" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
-                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+                <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+                </div>
             </div>
         </header>
 
         <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-12">
+            <!-- Journey Header -->
             <div class="text-center mb-16">
                 <span id="journey-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block bg-slate-100 text-slate-600">Your Chosen Path</span>
                 <h1 id="journey-title" class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Architect</h1>
                 <p id="journey-subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">Building a formidable physical and financial runway without sacrificing the magic of today.</p>
             </div>
 
+            <!-- Level Selector -->
             <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-12">
                 <h2 class="text-xl font-bold text-slate-900 text-center mb-2">Let's get started.</h2>
                 <p class="text-slate-500 text-center mb-10 text-sm">Tell me the level you are at today on this journey:</p>
@@ -125,6 +136,7 @@
                 </div>
             </section>
 
+            <!-- The Matrix (Learn / Do) -->
             <section class="mb-16">
                 <div class="flex items-center justify-between mb-6">
                     <h3 id="matrix-header" class="text-2xl font-bold text-slate-900">Your Path to Level 200</h3>
@@ -134,19 +146,23 @@
                 </div>
 
                 <div class="matrix-grid" id="matrix-container">
+                    <!-- Loading Overlay -->
                     <div class="matrix-loading-overlay" id="matrix-loader">
                         <i data-lucide="loader-2" class="w-8 h-8 text-emerald-500 animate-spin mb-3"></i>
                         <p class="text-slate-900 font-bold text-center">Fetching Nudge Protocol...</p>
                         <p class="text-sm text-slate-500 mt-1 text-center">Loading from Community Database.</p>
                     </div>
 
+                    <!-- Column Headers (Desktop) -->
                     <div class="hidden md:block"></div>
                     <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">Today</div>
                     <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">This Week</div>
                     <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">This Month</div>
 
+                    <!-- Row 1: LEARN -->
                     <div class="matrix-header-side flex items-center justify-center font-bold text-slate-900 text-xl rotate-180" style="writing-mode: vertical-rl;">LEARN</div>
                     
+                    <!-- Today Learn -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • Today</div>
                         <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="book-open" class="w-4 h-4"></i></div>
@@ -157,6 +173,7 @@
                         </div>
                     </div>
                     
+                    <!-- Week Learn -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • This Week</div>
                         <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="headphones" class="w-4 h-4"></i></div>
@@ -167,6 +184,7 @@
                         </div>
                     </div>
                     
+                    <!-- Month Learn -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • This Month</div>
                         <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="monitor-play" class="w-4 h-4"></i></div>
@@ -177,8 +195,10 @@
                         </div>
                     </div>
 
+                    <!-- Row 2: DO -->
                     <div class="matrix-header-side flex items-center justify-center font-bold text-slate-900 text-xl rotate-180" style="writing-mode: vertical-rl;">DO</div>
 
+                    <!-- Today Do -->
                     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • Today</div>
                         <div class="space-y-5">
@@ -188,6 +208,7 @@
                         </div>
                     </div>
                     
+                    <!-- Week Do -->
                     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • This Week</div>
                         <div class="space-y-5">
@@ -197,6 +218,7 @@
                         </div>
                     </div>
                     
+                    <!-- Month Do -->
                     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
                         <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • This Month</div>
                         <div class="space-y-5">
@@ -208,6 +230,7 @@
                 </div>
             </section>
 
+            <!-- Community CTA -->
             <section class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
                 <div>
                     <h3 class="text-xl font-bold text-slate-900 mb-2">You are not alone on this path.</h3>
@@ -228,10 +251,10 @@
         // ---------------------------------------------------------
         // GOOGLE SHEETS DATABASE INTEGRATION
         // ---------------------------------------------------------
-        // Replace this URL with your "Published to Web as CSV" Google Sheet link!
-        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vQv6jE7_l6RzN4W-zO9R9bLd7z9/pub?gid=0&single=true&output=csv"; 
+        // Fetches directly from your newly created and published Google Sheet
+        const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwP4c_8wCC_LTEWkxP7vG2MB9hzD2xloWRFAoEE1G1Atr8DQUMyH6nevvOcgIwBt5vGbrvY0s90rAz/pub?gid=43139328&single=true&output=csv"; 
         
-        let sheetDatabase = []; // We will store the parsed Google Sheet data here
+        let sheetDatabase = []; 
 
         // Load the database from Google Sheets instantly on page load
         async function loadDatabase() {
@@ -255,14 +278,14 @@
             
             if (row) return row;
             
-            // Fallback if that specific row hasn't been written in the Google Sheet yet
+            // Fallback if data is still loading or a row is missing
             return {
-                Learn_Today_Title: "Content Coming Soon", Learn_Today_Desc: "We are currently researching the best protocol for this specific level.", Learn_Today_URL: "#",
-                Learn_Week_Title: "Content Coming Soon", Learn_Week_Desc: "We are currently researching the best protocol for this specific level.", Learn_Week_URL: "#",
-                Learn_Month_Title: "Content Coming Soon", Learn_Month_Desc: "We are currently researching the best protocol for this specific level.", Learn_Month_URL: "#",
-                Do_Today_Cue: "TBD", Do_Today_Resp: "TBD", Do_Today_Rew: "TBD",
-                Do_Week_Cue: "TBD", Do_Week_Resp: "TBD", Do_Week_Rew: "TBD",
-                Do_Month_Cue: "TBD", Do_Month_Resp: "TBD", Do_Month_Rew: "TBD"
+                Learn_Today_Title: "Content Loading", Learn_Today_Desc: "Checking the Nudge database...", Learn_Today_URL: "#",
+                Learn_Week_Title: "Content Loading", Learn_Week_Desc: "Checking the Nudge database...", Learn_Week_URL: "#",
+                Learn_Month_Title: "Content Loading", Learn_Month_Desc: "Checking the Nudge database...", Learn_Month_URL: "#",
+                Do_Today_Cue: "...", Do_Today_Resp: "...", Do_Today_Rew: "...",
+                Do_Week_Cue: "...", Do_Week_Resp: "...", Do_Week_Rew: "...",
+                Do_Month_Cue: "...", Do_Month_Resp: "...", Do_Month_Rew: "..."
             };
         }
 
