@@ -24,7 +24,7 @@
         input[type=range].level-slider::-webkit-slider-thumb { border: 2px solid #0f172a; }
         .fade-text { transition: opacity 0.3s ease-in-out; }
         .matrix-grid { display: grid; grid-template-columns: 80px repeat(3, 1fr); gap: 1rem; position: relative; }
-        @media (max-width: 768px) { .matrix-grid { grid-template-columns: 1fr; } .matrix-header-side { display: none; } }
+        @media (max-width: 768px) { .matrix-grid { grid-template-columns: 1fr; } }
         
         .matrix-loading-overlay {
             position: absolute; inset: 0; background: rgba(248, 250, 252, 0.8); backdrop-filter: blur(4px);
@@ -86,15 +86,25 @@
             <!-- Persona Engine -->
             <section class="px-8 py-10 border-t border-slate-100 text-center">
                 <div class="inline-block mb-4 px-4 py-1.5 bg-slate-100 rounded-full">
-                    <h3 class="text-sm font-bold text-slate-800 fade-text" id="focus-title">Your Journey Focus: 50% Longevity / 50% Nowgevity</h3>
+                    <h3 class="text-sm font-bold text-slate-800 fade-text flex items-center justify-center gap-2" id="focus-title-container">
+                        <i id="focus-icon" class="ph-fill ph-scales text-emerald-500 text-lg"></i>
+                        <span id="focus-title">Your Journey Focus: 50% Longevity / 50% Nowgevity</span>
+                    </h3>
                 </div>
                 <p class="text-base text-slate-600 max-w-xl mx-auto leading-relaxed fade-text min-h-[4rem] flex items-center justify-center" id="focus-desc">
                     <strong class="text-slate-900 font-semibold mr-1">The Nudge Architect.</strong> You are seeking the ultimate equilibrium. You want to build a formidable physical and financial runway without sacrificing the magic of today.
                 </p>
                 <button id="start-journey-btn" class="mt-10 group flex items-center justify-center gap-2 w-full sm:w-auto mx-auto bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3.5 px-8 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98]">
                     Start This Journey
-                    <i data-lucide="arrow-right" class="w-4 h-4 group-hover:translate-x-1 transition-transform"></i>
+                    <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </button>
+                
+                <!-- Partner Link -->
+                <div class="mt-12 pt-6 border-t border-slate-100">
+                    <button id="open-partner-btn" class="text-xs font-semibold text-slate-500 hover:text-emerald-600 transition-colors uppercase tracking-widest flex items-center justify-center gap-2 mx-auto">
+                        <i class="ph-bold ph-handshake text-lg"></i> Become a Nudge Partner / Practitioner
+                    </button>
+                </div>
             </section>
         </main>
     </div>
@@ -115,6 +125,9 @@
         <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-12">
             <!-- Journey Header -->
             <div class="text-center mb-16">
+                <div id="journey-icon-container" class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-emerald-100">
+                    <i id="journey-page-icon" class="ph-fill ph-scales text-4xl text-emerald-500"></i>
+                </div>
                 <span id="journey-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block bg-slate-100 text-slate-600">Your Chosen Path</span>
                 <h1 id="journey-title" class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Architect</h1>
                 <p id="journey-subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">Building a formidable physical and financial runway without sacrificing the magic of today.</p>
@@ -132,6 +145,48 @@
                         <span class="text-center w-16">300<br/>Knowledgeable</span>
                         <span class="text-center w-16 -mr-4">400<br/>Expert</span>
                         <span class="text-center w-16 -mr-8">500<br/>Mastery</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- How The System Works -->
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-16 animate-in fade-in slide-in-from-bottom-4">
+                <div class="text-center mb-8">
+                    <h2 class="text-2xl font-bold text-slate-900 mb-3">How the System Works</h2>
+                    <p class="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">Now that you've identified where you're at, let's help you get to the next level. Your only job? <strong class="text-slate-900">Show up and do the work.</strong> As you progress, you'll engage in two vital pillars:</p>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Learn Pillar -->
+                    <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2.5 bg-blue-100 text-blue-600 rounded-xl"><i class="ph-bold ph-book-open text-xl"></i></div>
+                            <h3 class="font-bold text-blue-900 text-xl tracking-tight">LEARN</h3>
+                        </div>
+                        <p class="text-sm text-blue-800/80 leading-relaxed mb-4">
+                            Knowledge is the foundation of longevity and nowgevity. We curate the latest peer-reviewed science and insights so you don't have to guess.
+                        </p>
+                        <ul class="text-sm text-blue-900/70 space-y-2 font-medium">
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Read, watch, and listen to top-tier protocols.</li>
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Attend live online or in-person Nudge events.</li>
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Consult safely with your own healthcare provider or a trusted Nudge Specialist.</li>
+                        </ul>
+                    </div>
+
+                    <!-- Do Pillar -->
+                    <div class="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl"><i class="ph-bold ph-lightning text-xl"></i></div>
+                            <h3 class="font-bold text-emerald-900 text-xl tracking-tight">DO</h3>
+                        </div>
+                        <p class="text-sm text-emerald-800/80 leading-relaxed mb-4">
+                            Insight without action is just entertainment. We engineer friction-free, science-backed habit forming routines that fit into your life.
+                        </p>
+                        <ul class="text-sm text-emerald-900/70 space-y-2 font-medium">
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Form micro-habits through the Cue-Response-Reward loop.</li>
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Integrate effortlessly with partner apps like Felix, MyFitnessPal, Apple Fitness, and Calm.</li>
+                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Join a Nudge Group of like-minded people.</li>
+                        </ul>
                     </div>
                 </div>
             </section>
@@ -160,7 +215,7 @@
                     <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">This Month</div>
 
                     <!-- Row 1: LEARN -->
-                    <div class="matrix-header-side flex items-center justify-center font-bold text-slate-900 text-xl rotate-180" style="writing-mode: vertical-rl;">LEARN</div>
+                    <div class="flex items-center justify-center font-black text-slate-800 text-2xl md:text-xl md:rotate-180 md:[writing-mode:vertical-rl] tracking-widest md:tracking-normal py-4 md:py-0 w-full border-b-2 border-slate-200 md:border-none uppercase">LEARN</div>
                     
                     <!-- Today Learn -->
                     <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
@@ -196,7 +251,7 @@
                     </div>
 
                     <!-- Row 2: DO -->
-                    <div class="matrix-header-side flex items-center justify-center font-bold text-slate-900 text-xl rotate-180" style="writing-mode: vertical-rl;">DO</div>
+                    <div class="flex items-center justify-center font-black text-slate-800 text-2xl md:text-xl md:rotate-180 md:[writing-mode:vertical-rl] tracking-widest md:tracking-normal py-4 md:py-0 mt-8 md:mt-0 w-full border-b-2 border-slate-200 md:border-none uppercase">DO</div>
 
                     <!-- Today Do -->
                     <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
@@ -242,6 +297,90 @@
                     </button>
                 </div>
             </section>
+        </main>
+    </div>
+
+    <!-- VIEW 3: PARTNER & PRACTITIONER PAGE -->
+    <div id="view-partner" class="hidden min-h-screen bg-slate-50 pb-20 transition-opacity duration-500">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                <button id="back-from-partner-btn" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                    <i class="ph-bold ph-arrow-left"></i> Back to Assessment
+                </button>
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-12">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Network</h1>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">We integrate with industry-leading technology, medical professionals, and real community leaders to make showing up frictionless.</p>
+            </div>
+
+            <!-- Technology Network -->
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-slate-100 text-slate-700 rounded-lg"><i class="ph-bold ph-plugs-connected text-xl"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-900">Technology Partners</h2>
+                </div>
+                <p class="text-slate-600 mb-8 text-sm md:text-base">Nudge uses industry-leading, science-backed, and well-reviewed apps and devices you already know and trust. Our API bridges the gap between raw data and actionable habits.</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-heartbeat text-4xl text-rose-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Apple Health</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-bold ph-circle text-4xl text-slate-800 mb-3"></i><span class="text-xs font-bold text-slate-700">Oura</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-watch text-4xl text-blue-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Garmin</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-wind text-4xl text-sky-400 mb-3"></i><span class="text-xs font-bold text-slate-700">Calm</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-fork-knife text-4xl text-indigo-500 mb-3"></i><span class="text-xs font-bold text-slate-700">MyFitnessPal</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-pill text-4xl text-emerald-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Felix</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-google-logo text-4xl text-amber-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Google Health</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl border-dashed bg-transparent"><i class="ph-bold ph-plus text-2xl text-slate-400 mb-3"></i><span class="text-xs font-bold text-slate-500">More Coming</span></div>
+                </div>
+
+                <div class="bg-slate-50 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-100">
+                    <p class="text-sm text-slate-600 font-medium">Interested in becoming part of the Nudge Technology Network?</p>
+                    <button class="shrink-0 px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors text-sm">Contact Tech Team</button>
+                </div>
+            </section>
+
+            <!-- Practitioner Network -->
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="ph-bold ph-stethoscope text-xl"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-900">Healthcare Practitioners</h2>
+                </div>
+                <p class="text-slate-600 mb-6 text-sm md:text-base">Nudge works with certified Healthcare Practitioners and Clinical Services to keep you safe and well-guided. We believe longevity protocols must be backed by true medical oversight, not just internet advice.</p>
+                <div class="bg-emerald-50 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-emerald-100">
+                    <p class="text-sm text-emerald-900 font-medium">If you are interested in joining the Nudge Practitioner Network, contact us here.</p>
+                    <button class="shrink-0 px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm">Apply as Practitioner</button>
+                </div>
+            </section>
+
+            <!-- Communities & Coaches -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="ph-bold ph-users-three text-xl"></i></div>
+                        <h2 class="text-xl font-bold text-slate-900">Join a Community</h2>
+                    </div>
+                    <p class="text-slate-600 mb-6 text-sm">Nudge has thriving, private communities of real people on their own Journey. Camaraderie is the ultimate accountability tool.</p>
+                    <button id="cta-take-assessment" class="w-full px-6 py-3 bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm flex items-center justify-center gap-2">
+                        Take Assessment & Join <i class="ph-bold ph-arrow-right"></i>
+                    </button>
+                </section>
+
+                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
+                    <div class="flex items-center gap-3 mb-4">
+                        <div class="p-2 bg-rose-50 text-rose-600 rounded-lg"><i class="ph-bold ph-chalkboard-teacher text-xl"></i></div>
+                        <h2 class="text-xl font-bold text-slate-900">Become a Coach</h2>
+                    </div>
+                    <p class="text-slate-600 mb-6 text-sm">Are you passionate about habit formation and community building? Lead a local or digital cohort as a certified guide.</p>
+                    <button class="w-full px-6 py-3 bg-white text-slate-700 font-bold border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm flex items-center justify-center gap-2">
+                        Apply to be a Coach
+                    </button>
+                </section>
+            </div>
+
         </main>
     </div>
 
@@ -294,40 +433,50 @@
         // ---------------------------------------------------------
         const mainSlider = document.getElementById('balance-slider');
         const focusTitle = document.getElementById('focus-title');
+        const focusIcon = document.getElementById('focus-icon');
+        const focusTitleContainer = document.getElementById('focus-title-container');
         const focusDesc = document.getElementById('focus-desc');
         const nowLabel = document.getElementById('now-label');
         const longLabel = document.getElementById('long-label');
         const startBtn = document.getElementById('start-journey-btn');
+        
         const viewOnboarding = document.getElementById('view-onboarding');
         const viewJourney = document.getElementById('view-journey');
+        const viewPartner = document.getElementById('view-partner');
         const loader = document.getElementById('matrix-loader');
 
         const JOURNEYS = {
-            0: { name: "The Present Maximizer", shortDesc: "Anchoring in the current moment, prioritizing immediate joy, connection, and wholeheartedness." },
-            25: { name: "The Mindful Explorer", shortDesc: "Protecting your peace and prioritizing current lifestyle, with a mindful eye on the horizon." },
-            50: { name: "The Nudge Architect", shortDesc: "Building a formidable physical and financial runway without sacrificing the magic of today." },
-            75: { name: "The Optimized Forward-Thinker", shortDesc: "Highly disciplined, treating the body and assets as compounding machines for a limitless tomorrow." },
-            100: { name: "The Terminal Optimizer", shortDesc: "Ruthlessly dedicated to life extension, strictly engineering every biomarker and asset for maximum future yield." }
+            0: { name: "The Present Maximizer", shortDesc: "Anchoring in the current moment, prioritizing immediate joy, connection, and wholeheartedness.", icon: "ph-flower-lotus", colorClass: "text-rose-500", bgClass: "bg-rose-50 border-rose-100" },
+            25: { name: "The Mindful Explorer", shortDesc: "Protecting your peace and prioritizing current lifestyle, with a mindful eye on the horizon.", icon: "ph-binoculars", colorClass: "text-amber-500", bgClass: "bg-amber-50 border-amber-100" },
+            50: { name: "The Nudge Architect", shortDesc: "Building a formidable physical and financial runway without sacrificing the magic of today.", icon: "ph-scales", colorClass: "text-emerald-500", bgClass: "bg-emerald-50 border-emerald-100" },
+            75: { name: "The Optimized Forward-Thinker", shortDesc: "Highly disciplined, treating the body and assets as compounding machines for a limitless tomorrow.", icon: "ph-rocket-launch", colorClass: "text-blue-500", bgClass: "bg-blue-50 border-blue-100" },
+            100: { name: "The Terminal Optimizer", shortDesc: "Ruthlessly dedicated to life extension, strictly engineering every biomarker and asset for maximum future yield.", icon: "ph-dna", colorClass: "text-indigo-500", bgClass: "bg-indigo-50 border-indigo-100" }
         };
 
         const personaData = {
-            0: { title: "Your Journey Focus: 100% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Present Maximizer.</strong> You want to fully anchor in the current moment, prioritizing immediate joy, connection, and wholeheartedness over future optimization." },
-            25: { title: "Your Journey Focus: 25% Longevity / 75% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Mindful Explorer.</strong> You want to protect your peace and prioritize your current lifestyle and relationships, while keeping just enough of an eye on the horizon to stay safe." },
-            50: { title: "Your Journey Focus: 50% Longevity / 50% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Nudge Architect.</strong> You are seeking the ultimate equilibrium. You want to build a formidable physical and financial runway without sacrificing the magic of today." },
-            75: { title: "Your Journey Focus: 75% Longevity / 25% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Optimized Forward-Thinker.</strong> You want to be highly disciplined, treating your body and assets as compounding machines, making calculated sacrifices today for a limitless tomorrow." },
-            100: { title: "Your Journey Focus: 100% Longevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Terminal Optimizer.</strong> You want to ruthlessly dedicate yourself to the science of life extension, strictly engineering every input, biomarker, and asset for maximum future yield." }
+            0: { title: "Your Journey Focus: 100% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Present Maximizer.</strong> You want to fully anchor in the current moment, prioritizing immediate joy, connection, and wholeheartedness over future optimization.", icon: "ph-flower-lotus", color: "text-rose-500" },
+            25: { title: "Your Journey Focus: 25% Longevity / 75% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Mindful Explorer.</strong> You want to protect your peace and prioritize your current lifestyle and relationships, while keeping just enough of an eye on the horizon to stay safe.", icon: "ph-binoculars", color: "text-amber-500" },
+            50: { title: "Your Journey Focus: 50% Longevity / 50% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Nudge Architect.</strong> You are seeking the ultimate equilibrium. You want to build a formidable physical and financial runway without sacrificing the magic of today.", icon: "ph-scales", color: "text-emerald-500" },
+            75: { title: "Your Journey Focus: 75% Longevity / 25% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Optimized Forward-Thinker.</strong> You want to be highly disciplined, treating your body and assets as compounding machines, making calculated sacrifices today for a limitless tomorrow.", icon: "ph-rocket-launch", color: "text-blue-500" },
+            100: { title: "Your Journey Focus: 100% Longevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Terminal Optimizer.</strong> You want to ruthlessly dedicate yourself to the science of life extension, strictly engineering every input, biomarker, and asset for maximum future yield.", icon: "ph-dna", color: "text-indigo-500" }
         };
 
         mainSlider.addEventListener('input', () => {
             const val = parseInt(mainSlider.value);
             nowLabel.textContent = `${100 - val}%`;
             longLabel.textContent = `${val}%`;
-            focusTitle.style.opacity = '0';
+            
+            focusTitleContainer.style.opacity = '0';
             focusDesc.style.opacity = '0';
+            
             setTimeout(() => {
                 focusTitle.textContent = personaData[val].title;
                 focusDesc.innerHTML = personaData[val].desc;
-                focusTitle.style.opacity = '1';
+                
+                // Update Icon & Colors
+                focusIcon.className = `ph-fill ${personaData[val].icon} ${personaData[val].color} text-lg`;
+                
+                focusTitleContainer.style.opacity = '1';
                 focusDesc.style.opacity = '1';
             }, 150);
         });
@@ -336,9 +485,17 @@
         
         startBtn.addEventListener('click', () => {
             currentJourneyVal = parseInt(mainSlider.value);
-            document.getElementById('journey-title').textContent = JOURNEYS[currentJourneyVal].name;
-            document.getElementById('journey-subtitle').textContent = JOURNEYS[currentJourneyVal].shortDesc;
-            document.getElementById('community-name').textContent = JOURNEYS[currentJourneyVal].name;
+            const journeyData = JOURNEYS[currentJourneyVal];
+            
+            document.getElementById('journey-title').textContent = journeyData.name;
+            document.getElementById('journey-subtitle').textContent = journeyData.shortDesc;
+            document.getElementById('community-name').textContent = journeyData.name;
+            
+            // Set Journey Page Icon & Theme
+            const journeyPageIcon = document.getElementById('journey-page-icon');
+            const journeyIconContainer = document.getElementById('journey-icon-container');
+            journeyPageIcon.className = `ph-fill ${journeyData.icon} text-4xl ${journeyData.colorClass}`;
+            journeyIconContainer.className = `w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border ${journeyData.bgClass}`;
 
             document.getElementById('level-slider').value = 100;
             updateMatrix(currentJourneyVal, 100);
@@ -360,6 +517,29 @@
                 viewOnboarding.classList.remove('opacity-0');
             }, 500);
         });
+
+        // Partner Portal Routing
+        document.getElementById('open-partner-btn').addEventListener('click', () => {
+            viewOnboarding.classList.add('opacity-0');
+            setTimeout(() => {
+                viewOnboarding.classList.add('hidden');
+                viewPartner.classList.remove('hidden');
+                void viewPartner.offsetWidth;
+                viewPartner.classList.remove('opacity-0');
+            }, 500);
+        });
+
+        const goBackToAssessment = () => {
+            viewPartner.classList.add('opacity-0');
+            setTimeout(() => {
+                viewPartner.classList.add('hidden');
+                viewOnboarding.classList.remove('hidden');
+                viewOnboarding.classList.remove('opacity-0');
+            }, 500);
+        };
+
+        document.getElementById('back-from-partner-btn').addEventListener('click', goBackToAssessment);
+        document.getElementById('cta-take-assessment').addEventListener('click', goBackToAssessment);
 
         // Matrix Logic
         const levelSlider = document.getElementById('level-slider');
