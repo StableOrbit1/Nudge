@@ -504,6 +504,7 @@
             setTimeout(() => {
                 viewOnboarding.classList.add('hidden');
                 viewJourney.classList.remove('hidden');
+                window.scrollTo(0, 0);
                 void viewJourney.offsetWidth;
                 viewJourney.classList.remove('opacity-0');
             }, 500);
@@ -514,6 +515,7 @@
             setTimeout(() => {
                 viewJourney.classList.add('hidden');
                 viewOnboarding.classList.remove('hidden');
+                window.scrollTo(0, 0);
                 viewOnboarding.classList.remove('opacity-0');
             }, 500);
         });
@@ -524,6 +526,7 @@
             setTimeout(() => {
                 viewOnboarding.classList.add('hidden');
                 viewPartner.classList.remove('hidden');
+                window.scrollTo(0, 0);
                 void viewPartner.offsetWidth;
                 viewPartner.classList.remove('opacity-0');
             }, 500);
@@ -534,6 +537,7 @@
             setTimeout(() => {
                 viewPartner.classList.add('hidden');
                 viewOnboarding.classList.remove('hidden');
+                window.scrollTo(0, 0);
                 viewOnboarding.classList.remove('opacity-0');
             }, 500);
         };
