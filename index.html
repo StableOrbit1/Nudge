@@ -8,7 +8,7 @@
     <!-- Google Fonts & Tailwind -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
     <script src="https://cdn.tailwindcss.com"></script>
     
     <!-- Icons & CSV Parser -->
@@ -24,21 +24,57 @@
         input[type=range].level-slider::-webkit-slider-runnable-track { background: #e2e8f0; }
         input[type=range].level-slider::-webkit-slider-thumb { border: 2px solid #0f172a; }
         .fade-text { transition: opacity 0.3s ease-in-out; }
-        .matrix-grid { display: grid; grid-template-columns: 80px repeat(3, 1fr); gap: 1rem; position: relative; }
-        @media (max-width: 768px) { .matrix-grid { grid-template-columns: 1fr; } .matrix-header-side { display: none; } }
         
         .matrix-loading-overlay {
             position: absolute; inset: 0; background: rgba(248, 250, 252, 0.8); backdrop-filter: blur(4px);
             display: flex; flex-direction: column; align-items: center; justify-content: center;
-            z-index: 20; border-radius: 1rem; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
+            z-index: 20; border-radius: 1.5rem; opacity: 0; pointer-events: none; transition: opacity 0.3s ease;
         }
         .matrix-loading-overlay.active { opacity: 1; pointer-events: all; }
         
-        /* Custom Checkbox Color */
+        /* Custom Checkboxes */
         .assessment-cb { accent-color: #10b981; }
+        .task-cb { 
+            appearance: none; width: 28px; height: 28px; border: 2px solid #cbd5e1; border-radius: 8px; cursor: pointer;
+            display: grid; place-content: center; transition: all 0.2s ease; background: white;
+        }
+        .task-cb::before {
+            content: ""; width: 14px; height: 14px; transform: scale(0); transition: 120ms transform ease-in-out;
+            box-shadow: inset 1em 1em white; background-color: white; transform-origin: center; clip-path: polygon(14% 44%, 0 65%, 50% 100%, 100% 16%, 80% 0%, 43% 62%);
+        }
+        .task-cb:checked { background-color: #10b981; border-color: #10b981; }
+        .task-cb:checked::before { transform: scale(1); }
+
+        .progress-fill { transition: width 0.8s cubic-bezier(0.34, 1.56, 0.64, 1); }
+
+        /* Modal Glassmorphism */
+        .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
+
+    <!-- DAILY COACHING MODAL -->
+    <div id="coaching-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-modal max-w-lg w-full rounded-[2rem] shadow-2xl p-8 relative transform scale-95 transition-transform duration-300" id="coaching-modal-content">
+            <button id="close-modal-btn" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
+                <i class="ph-bold ph-x"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-6">
+                <div class="w-10 h-10 bg-slate-900 text-white rounded-xl flex items-center justify-center shadow-md">
+                    <i class="ph-fill ph-quotes text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400">Daily Coaching Moment</h3>
+                    <p class="font-bold text-slate-900 text-sm" id="quote-category">Nowgevity Focus</p>
+                </div>
+            </div>
+            <p class="text-xl md:text-2xl font-semibold text-slate-800 leading-snug mb-6" id="quote-text">"Loading quote..."</p>
+            <p class="text-sm font-bold text-slate-500 flex items-center gap-2">
+                <span class="w-4 h-[2px] bg-emerald-500 rounded-full"></span> 
+                <span id="quote-author">Author</span>
+            </p>
+        </div>
+    </div>
 
     <!-- VIEW 0: LOGIN GATE -->
     <div id="view-login" class="min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
@@ -48,7 +84,6 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight mb-2">Private Beta Access</h1>
             <p class="text-sm text-slate-500 mb-8">Please paste your Private Welcome Link or Access Code below.</p>
-            
             <div class="space-y-4">
                 <input type="password" id="access-code-input" placeholder="Paste link or code..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-center tracking-widest font-mono">
                 <p id="login-error" class="text-xs text-rose-500 font-semibold h-4 opacity-0 transition-opacity">Incorrect access code.</p>
@@ -62,7 +97,6 @@
     <!-- VIEW 1: ONBOARDING SCREEN -->
     <div id="view-onboarding" class="hidden min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-0">
         <main class="max-w-3xl w-full bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden">
-            <!-- Manifesto -->
             <section class="px-8 pt-12 pb-8 text-center border-b border-slate-100">
                 <div class="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-6">
                     <span class="text-white font-bold text-3xl tracking-tighter">N</span>
@@ -76,7 +110,6 @@
                 </div>
             </section>
 
-            <!-- Slider -->
             <section class="px-8 py-10 bg-slate-50/50">
                 <div class="flex justify-between items-end mb-4">
                     <div class="flex flex-col items-start">
@@ -106,7 +139,6 @@
                 </div>
             </section>
 
-            <!-- Persona Engine -->
             <section class="px-8 py-10 border-t border-slate-100 text-center">
                 <div class="inline-block mb-4 px-4 py-1.5 bg-slate-100 rounded-full">
                     <h3 class="text-sm font-bold text-slate-800 fade-text flex items-center justify-center gap-2" id="focus-title-container">
@@ -121,22 +153,15 @@
                     Start This Journey
                     <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                 </button>
-                
-                <!-- Partner Link -->
-                <div class="mt-12 pt-6 border-t border-slate-100">
-                    <button id="open-partner-btn" class="text-xs font-semibold text-slate-500 hover:text-emerald-600 transition-colors uppercase tracking-widest flex items-center justify-center gap-2 mx-auto">
-                        <i class="ph-bold ph-handshake text-lg"></i> Become a Nudge Partner / Practitioner
-                    </button>
-                </div>
             </section>
         </main>
     </div>
 
-    <!-- VIEW 2: PROGRESSIVE JOURNEY PAGE -->
-    <div id="view-journey" class="hidden min-h-screen pb-20 transition-opacity duration-500 opacity-0">
+    <!-- VIEW 2: PROGRESSIVE JOURNEY PAGE (ASSESSMENT) -->
+    <div id="view-assessment" class="hidden min-h-screen pb-20 transition-opacity duration-500 opacity-0">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-                <button id="back-btn" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                <button id="back-to-onboarding" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
                     <i data-lucide="arrow-left" class="w-4 h-4"></i> Back
                 </button>
                 <div class="flex items-center gap-2">
@@ -145,288 +170,270 @@
             </div>
         </header>
 
-        <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-12">
-            <!-- Journey Header -->
-            <div class="text-center mb-16">
-                <div id="journey-icon-container" class="w-20 h-20 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-emerald-100">
-                    <i id="journey-page-icon" class="ph-fill ph-scales text-4xl text-emerald-500"></i>
+        <main class="max-w-3xl mx-auto px-4 sm:px-6 pt-12">
+            <div class="text-center mb-10">
+                <div id="assessment-icon-container" class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-emerald-100">
+                    <i id="assessment-page-icon" class="ph-fill ph-scales text-3xl text-emerald-500"></i>
                 </div>
-                <span id="journey-badge" class="px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider mb-4 inline-block bg-slate-100 text-slate-600">Your Chosen Path</span>
-                <h1 id="journey-title" class="text-4xl md:text-5xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Architect</h1>
-                <p id="journey-subtitle" class="text-lg text-slate-600 max-w-2xl mx-auto">Building a formidable physical and financial runway without sacrificing the magic of today.</p>
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2">Establish Your Baseline</h1>
+                <p class="text-slate-600 text-sm max-w-xl mx-auto">Be honest. We judge harshly. Let's calibrate the Nudge Engine to your true current habits so we can assign you the correct protocol.</p>
             </div>
 
-            <!-- Calibration & Level Selector -->
             <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-12">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-2">Establish Your Baseline</h2>
-                    <p class="text-slate-500 text-sm max-w-xl mx-auto">Be honest. We judge harshly. Let's calibrate the Nudge Engine to your true current habits so we can assign you the correct protocol.</p>
+                <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-6">Calibration Audit</h3>
+                <div id="assessment-questions" class="space-y-3 mb-8">
+                    <!-- Populated by JS -->
                 </div>
-
-                <!-- Step 1: Assessment -->
-                <div class="mb-10 border-b border-slate-100 pb-10">
-                    <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-4">Step 1: Calibration Audit</h3>
-                    <div id="assessment-questions" class="space-y-3 mb-6">
-                        <!-- Populated by JS -->
-                    </div>
-                    <div class="flex flex-col sm:flex-row items-center gap-4">
-                        <button id="calculate-level-btn" class="w-full sm:w-auto px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-md text-sm flex items-center justify-center gap-2">
-                            <i class="ph-bold ph-calculator"></i> Calculate My Level
-                        </button>
-                        <p id="calculation-result" class="text-emerald-600 font-semibold text-sm hidden transition-opacity"></p>
-                    </div>
-                </div>
-
-                <!-- Step 2: Slider -->
-                <div>
-                    <div class="flex items-center justify-between mb-6">
-                        <h3 class="text-sm font-bold text-slate-400 uppercase tracking-widest">Step 2: Fine-Tune Level</h3>
-                        <span id="current-level-display" class="bg-slate-900 text-white text-xs font-bold px-3 py-1 rounded-full">Level 100</span>
-                    </div>
-                    <div class="max-w-2xl mx-auto relative px-4 md:px-8">
-                        <input type="range" id="level-slider" min="100" max="500" step="100" value="100" class="level-slider w-full z-10 relative transition-all duration-300">
-                        <!-- Adjusted responsive text sizing and widths to prevent collision -->
-                        <div class="flex justify-between mt-4 text-[10px] sm:text-xs font-semibold text-slate-400">
-                            <span class="text-center w-12 sm:w-16 -ml-3 sm:-ml-5">100<br/>Newbie</span>
-                            <span class="text-center w-14 sm:w-16">200<br/>Aware</span>
-                            <span class="text-center w-20 sm:w-24">300<br/>Knowledgeable</span>
-                            <span class="text-center w-14 sm:w-16">400<br/>Expert</span>
-                            <span class="text-center w-12 sm:w-16 -mr-3 sm:-mr-5">500<br/>Mastery</span>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- How The System Works -->
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-16">
-                <div class="text-center mb-8">
-                    <h2 class="text-2xl font-bold text-slate-900 mb-3">How the System Works</h2>
-                    <p class="text-slate-600 max-w-2xl mx-auto text-sm md:text-base">Now that your baseline is set, your only job is to <strong class="text-slate-900">show up and do the work.</strong> As you progress, you'll engage in two vital pillars:</p>
-                </div>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div class="bg-blue-50/50 p-6 rounded-2xl border border-blue-100">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2.5 bg-blue-100 text-blue-600 rounded-xl"><i class="ph-bold ph-book-open text-xl"></i></div>
-                            <h3 class="font-bold text-blue-900 text-xl tracking-tight">LEARN</h3>
-                        </div>
-                        <p class="text-sm text-blue-800/80 leading-relaxed mb-4">
-                            Knowledge is the foundation of longevity and nowgevity. We curate the latest peer-reviewed science and insights so you don't have to guess.
-                        </p>
-                        <ul class="text-sm text-blue-900/70 space-y-2 font-medium">
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Read, watch, and listen to top-tier protocols.</li>
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Attend live online or in-person Nudge events.</li>
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-blue-500 mt-0.5"></i> Consult safely with your own healthcare provider or a trusted Nudge Specialist.</li>
-                        </ul>
-                    </div>
-
-                    <div class="bg-emerald-50/50 p-6 rounded-2xl border border-emerald-100">
-                        <div class="flex items-center gap-3 mb-4">
-                            <div class="p-2.5 bg-emerald-100 text-emerald-600 rounded-xl"><i class="ph-bold ph-lightning text-xl"></i></div>
-                            <h3 class="font-bold text-emerald-900 text-xl tracking-tight">DO</h3>
-                        </div>
-                        <p class="text-sm text-emerald-800/80 leading-relaxed mb-4">
-                            Insight without action is just entertainment. We engineer friction-free, science-backed habit forming routines that fit into your life.
-                        </p>
-                        <ul class="text-sm text-emerald-900/70 space-y-2 font-medium">
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Form micro-habits through the Cue-Response-Reward loop.</li>
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Integrate effortlessly with partner apps like Felix, MyFitnessPal, Apple Fitness, and Calm.</li>
-                            <li class="flex items-start gap-2"><i class="ph-fill ph-check-circle text-emerald-500 mt-0.5"></i> Join a Nudge Group of like-minded people.</li>
-                        </ul>
-                    </div>
-                </div>
-            </section>
-
-            <!-- The Matrix (Learn / Do) -->
-            <section class="mb-16">
-                <div class="flex items-center justify-between mb-6">
-                    <h3 id="matrix-header" class="text-2xl font-bold text-slate-900">Your Path to Level 100</h3>
-                    <span class="text-sm font-medium text-slate-500 bg-white px-3 py-1 rounded-full border border-slate-200 shadow-sm flex items-center gap-2">
-                        <i data-lucide="database" class="w-4 h-4 text-emerald-500"></i> Nudge Database
-                    </span>
-                </div>
-
-                <div class="matrix-grid" id="matrix-container">
-                    <!-- Loading Overlay -->
-                    <div class="matrix-loading-overlay" id="matrix-loader">
-                        <i data-lucide="loader-2" class="w-8 h-8 text-emerald-500 animate-spin mb-3"></i>
-                        <p class="text-slate-900 font-bold text-center">Fetching Nudge Protocol...</p>
-                        <p class="text-sm text-slate-500 mt-1 text-center">Loading from Community Database.</p>
-                    </div>
-
-                    <!-- Column Headers (Desktop) -->
-                    <div class="hidden md:block"></div>
-                    <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">Today</div>
-                    <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">This Week</div>
-                    <div class="hidden md:block text-xs font-bold text-slate-400 uppercase tracking-widest text-center mb-4">This Month</div>
-
-                    <!-- Row 1: LEARN -->
-                    <div class="flex items-center justify-center font-black text-slate-800 text-2xl md:text-xl md:rotate-180 md:[writing-mode:vertical-rl] tracking-widest md:tracking-normal py-4 md:py-0 w-full border-b-2 border-slate-200 md:border-none uppercase">LEARN</div>
-                    
-                    <!-- Today Learn -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • Today</div>
-                        <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="book-open" class="w-4 h-4"></i></div>
-                        <h4 class="font-bold text-slate-900 pr-10 mb-2 leading-tight" id="learn-today-title">-</h4>
-                        <p class="text-sm text-slate-600 mb-6 flex-1" id="learn-today-desc">-</p>
-                        <div class="mt-auto border-t border-slate-100 pt-4">
-                            <a href="#" id="learn-today-link" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm">Access Source <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
-                        </div>
-                    </div>
-                    
-                    <!-- Week Learn -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • This Week</div>
-                        <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="headphones" class="w-4 h-4"></i></div>
-                        <h4 class="font-bold text-slate-900 pr-10 mb-2 leading-tight" id="learn-week-title">-</h4>
-                        <p class="text-sm text-slate-600 mb-6 flex-1" id="learn-week-desc">-</p>
-                        <div class="mt-auto border-t border-slate-100 pt-4">
-                            <a href="#" id="learn-week-link" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm">Access Source <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
-                        </div>
-                    </div>
-                    
-                    <!-- Month Learn -->
-                    <div class="bg-white p-6 rounded-2xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow relative flex flex-col">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Learn • This Month</div>
-                        <div class="absolute top-4 right-4 w-8 h-8 bg-blue-50 text-blue-500 rounded-full flex items-center justify-center"><i data-lucide="monitor-play" class="w-4 h-4"></i></div>
-                        <h4 class="font-bold text-slate-900 pr-10 mb-2 leading-tight" id="learn-month-title">-</h4>
-                        <p class="text-sm text-slate-600 mb-6 flex-1" id="learn-month-desc">-</p>
-                        <div class="mt-auto border-t border-slate-100 pt-4">
-                            <a href="#" id="learn-month-link" target="_blank" class="w-full inline-flex items-center justify-center gap-2 bg-blue-50 hover:bg-blue-100 text-blue-600 font-bold py-2.5 px-4 rounded-xl transition-colors text-sm">Access Source <i data-lucide="external-link" class="w-3.5 h-3.5"></i></a>
-                        </div>
-                    </div>
-
-                    <!-- Row 2: DO -->
-                    <div class="flex items-center justify-center font-black text-slate-800 text-2xl md:text-xl md:rotate-180 md:[writing-mode:vertical-rl] tracking-widest md:tracking-normal py-4 md:py-0 mt-8 md:mt-0 w-full border-b-2 border-slate-200 md:border-none uppercase">DO</div>
-
-                    <!-- Today Do -->
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • Today</div>
-                        <div class="space-y-5">
-                            <div><span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">Cue</span><span class="text-sm text-slate-300" id="do-today-cue">-</span></div>
-                            <div><span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Response</span><span class="text-sm font-semibold" id="do-today-resp">-</span></div>
-                            <div><span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block mb-1">Reward</span><span class="text-sm text-slate-300" id="do-today-rew">-</span></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Week Do -->
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • This Week</div>
-                        <div class="space-y-5">
-                            <div><span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">Cue</span><span class="text-sm text-slate-300" id="do-week-cue">-</span></div>
-                            <div><span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Response</span><span class="text-sm font-semibold" id="do-week-resp">-</span></div>
-                            <div><span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block mb-1">Reward</span><span class="text-sm text-slate-300" id="do-week-rew">-</span></div>
-                        </div>
-                    </div>
-                    
-                    <!-- Month Do -->
-                    <div class="bg-slate-900 p-6 rounded-2xl border border-slate-800 shadow-lg text-white">
-                        <div class="md:hidden text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Do • This Month</div>
-                        <div class="space-y-5">
-                            <div><span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider block mb-1">Cue</span><span class="text-sm text-slate-300" id="do-month-cue">-</span></div>
-                            <div><span class="text-[10px] font-bold text-blue-400 uppercase tracking-wider block mb-1">Response</span><span class="text-sm font-semibold" id="do-month-resp">-</span></div>
-                            <div><span class="text-[10px] font-bold text-rose-400 uppercase tracking-wider block mb-1">Reward</span><span class="text-sm text-slate-300" id="do-month-rew">-</span></div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Community CTA -->
-            <section class="bg-white p-8 rounded-3xl border border-slate-200 shadow-sm flex flex-col md:flex-row items-center justify-between gap-6">
-                <div>
-                    <h3 class="text-xl font-bold text-slate-900 mb-2">You are not alone on this path.</h3>
-                    <p class="text-slate-600">Join a private cohort of members currently pursuing the <strong id="community-name" class="text-slate-800">Nudge Architect</strong> journey.</p>
-                </div>
-                <div class="flex flex-col items-center sm:items-end shrink-0">
-                    <button class="px-6 py-2.5 bg-emerald-50 text-emerald-700 font-semibold rounded-xl border border-emerald-200 hover:bg-emerald-100 transition-colors">
-                        Join Cohort
+                <div class="flex flex-col sm:flex-row items-center justify-between gap-4 pt-6 border-t border-slate-100">
+                    <p id="calculation-result" class="text-emerald-600 font-semibold text-sm hidden transition-opacity flex-1"></p>
+                    <button id="calculate-level-btn" class="w-full sm:w-auto px-8 py-3.5 bg-slate-900 hover:bg-slate-800 text-white font-bold rounded-xl transition-all shadow-md text-sm flex items-center justify-center gap-2 ml-auto">
+                        Calculate Protocol & Begin <i class="ph-bold ph-arrow-right"></i>
                     </button>
                 </div>
             </section>
         </main>
     </div>
 
-    <!-- VIEW 3: PARTNER & PRACTITIONER PAGE -->
-    <div id="view-partner" class="hidden min-h-screen bg-slate-50 pb-20 transition-opacity duration-500 opacity-0">
-        <!-- Header -->
+    <!-- VIEW 3: 30-DAY PROTOCOL DASHBOARD -->
+    <div id="view-dashboard" class="hidden min-h-screen pb-20 transition-opacity duration-500 opacity-0">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
-            <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
-                <button id="back-from-partner-btn" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
-                    <i class="ph-bold ph-arrow-left"></i> Back to Assessment
+            <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                <button id="back-to-assessment" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                    <i data-lucide="arrow-left" class="w-4 h-4"></i> Recalibrate
                 </button>
-                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+                <div class="flex items-center gap-4">
+                    <div class="text-right hidden sm:block">
+                        <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Your Points</p>
+                        <p class="text-sm font-bold text-emerald-600" id="header-xp">0 XP</p>
+                    </div>
+                    <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+                </div>
             </div>
         </header>
 
-        <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-12">
-            <div class="text-center mb-12">
-                <h1 class="text-4xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Network</h1>
-                <p class="text-lg text-slate-600 max-w-2xl mx-auto">We integrate with industry-leading technology, medical professionals, and real community leaders to make showing up frictionless.</p>
-            </div>
-
-            <!-- Technology Network -->
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-slate-100 text-slate-700 rounded-lg"><i class="ph-bold ph-plugs-connected text-xl"></i></div>
-                    <h2 class="text-2xl font-bold text-slate-900">Technology Partners</h2>
+        <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 md:pt-12">
+            <!-- Journey Header & Progress -->
+            <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8 relative overflow-hidden">
+                <!-- Background Decoration -->
+                <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
+                    <i id="dash-bg-icon" class="ph-fill ph-scales text-[200px]"></i>
                 </div>
-                <p class="text-slate-600 mb-8 text-sm md:text-base">Nudge uses industry-leading, science-backed, and well-reviewed apps and devices you already know and trust. Our API bridges the gap between raw data and actionable habits.</p>
                 
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-heartbeat text-4xl text-rose-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Apple Health</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-bold ph-circle text-4xl text-slate-800 mb-3"></i><span class="text-xs font-bold text-slate-700">Oura</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-watch text-4xl text-blue-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Garmin</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-wind text-4xl text-sky-400 mb-3"></i><span class="text-xs font-bold text-slate-700">Calm</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-fork-knife text-4xl text-indigo-500 mb-3"></i><span class="text-xs font-bold text-slate-700">MyFitnessPal</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-pill text-4xl text-emerald-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Felix</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-google-logo text-4xl text-amber-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Google Health</span></div>
-                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl border-dashed bg-transparent"><i class="ph-bold ph-plus text-2xl text-slate-400 mb-3"></i><span class="text-xs font-bold text-slate-500">More Coming</span></div>
-                </div>
-
-                <div class="bg-slate-50 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-slate-100">
-                    <p class="text-sm text-slate-600 font-medium">Interested in becoming part of the Nudge Technology Network?</p>
-                    <button class="shrink-0 px-6 py-2.5 bg-slate-900 text-white font-semibold rounded-xl hover:bg-slate-800 transition-colors text-sm">Contact Tech Team</button>
-                </div>
-            </section>
-
-            <!-- Practitioner Network -->
-            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
-                <div class="flex items-center gap-3 mb-4">
-                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="ph-bold ph-stethoscope text-xl"></i></div>
-                    <h2 class="text-2xl font-bold text-slate-900">Healthcare Practitioners</h2>
-                </div>
-                <p class="text-slate-600 mb-6 text-sm md:text-base">Nudge works with certified Healthcare Practitioners and Clinical Services to keep you safe and well-guided. We believe longevity protocols must be backed by true medical oversight, not just internet advice.</p>
-                <div class="bg-emerald-50 rounded-xl p-6 flex flex-col sm:flex-row items-center justify-between gap-4 border border-emerald-100">
-                    <p class="text-sm text-emerald-900 font-medium">If you are interested in joining the Nudge Practitioner Network, contact us here.</p>
-                    <button class="shrink-0 px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm">Apply as Practitioner</button>
-                </div>
-            </section>
-
-            <!-- Communities & Coaches -->
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
-                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="p-2 bg-blue-50 text-blue-600 rounded-lg"><i class="ph-bold ph-users-three text-xl"></i></div>
-                        <h2 class="text-xl font-bold text-slate-900">Join a Community</h2>
+                <div class="relative z-10 flex flex-col md:flex-row md:items-end justify-between gap-6">
+                    <div>
+                        <span id="dash-journey-badge" class="px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider mb-3 inline-flex items-center gap-1.5 bg-slate-100 text-slate-600">
+                            <i id="dash-small-icon" class="ph-fill ph-scales text-emerald-500"></i> <span id="dash-journey-name">The Nudge Architect</span>
+                        </span>
+                        <h1 class="text-3xl md:text-4xl font-black tracking-tight text-slate-900 mb-1">Level <span id="dash-level">100</span> Protocol</h1>
+                        <p class="text-sm text-slate-500 font-medium">Your customized 30-day active integration plan.</p>
                     </div>
-                    <p class="text-slate-600 mb-6 text-sm">Nudge has thriving, private communities of real people on their own Journey. Camaraderie is the ultimate accountability tool.</p>
-                    <button id="cta-take-assessment" class="w-full px-6 py-3 bg-blue-50 text-blue-700 font-bold border border-blue-200 rounded-xl hover:bg-blue-100 transition-colors text-sm flex items-center justify-center gap-2">
-                        Take Assessment & Join <i class="ph-bold ph-arrow-right"></i>
-                    </button>
-                </section>
+                    
+                    <div class="w-full md:w-80 bg-slate-50 rounded-2xl p-4 border border-slate-100">
+                        <div class="flex items-center justify-between mb-4 bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
+                            <button id="day-prev" class="p-1 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors"><i class="ph-bold ph-caret-left"></i></button>
+                            <span class="text-sm font-bold text-slate-900 uppercase tracking-widest" id="dash-day-display">Day 1 of 30</span>
+                            <button id="day-next" class="p-1 text-slate-400 hover:text-slate-900 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors"><i class="ph-bold ph-caret-right"></i></button>
+                        </div>
 
-                <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8">
-                    <div class="flex items-center gap-3 mb-4">
-                        <div class="p-2 bg-rose-50 text-rose-600 rounded-lg"><i class="ph-bold ph-chalkboard-teacher text-xl"></i></div>
-                        <h2 class="text-xl font-bold text-slate-900">Become a Coach</h2>
+                        <div class="flex justify-between items-end mb-2">
+                            <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Level XP</span>
+                            <span class="text-sm font-bold text-slate-900"><span id="dash-xp">0</span> / 900 XP</span>
+                        </div>
+                        <div class="h-3 w-full bg-slate-200 rounded-full overflow-hidden">
+                            <div id="progress-bar-fill" class="h-full bg-emerald-500 progress-fill w-0"></div>
+                        </div>
                     </div>
-                    <p class="text-slate-600 mb-6 text-sm">Are you passionate about habit formation and community building? Lead a local or digital cohort as a certified guide.</p>
-                    <button class="w-full px-6 py-3 bg-white text-slate-700 font-bold border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors text-sm flex items-center justify-center gap-2">
-                        Apply to be a Coach
-                    </button>
-                </section>
+                </div>
             </div>
 
+            <!-- Two Column Layout -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                <!-- Left Column: Daily, Weekly & Diagnostics -->
+                <div class="lg:col-span-2 space-y-6">
+                    
+                    <div class="flex items-center justify-between mb-2">
+                        <h2 class="text-xl font-bold text-slate-900">Current Assignments</h2>
+                    </div>
+
+                    <!-- DAILY COACHING MOMENT BUTTON -->
+                    <button id="btn-coaching" class="w-full relative overflow-hidden bg-slate-900 hover:bg-slate-800 text-white rounded-3xl shadow-md transition-all active:scale-[0.99] group flex flex-col sm:flex-row items-center sm:items-start text-left gap-4 p-6 border border-slate-800 hover:border-slate-700">
+                        <div class="absolute -right-4 -top-4 opacity-10 group-hover:scale-110 transition-transform duration-500 pointer-events-none">
+                            <i class="ph-fill ph-sparkle text-8xl"></i>
+                        </div>
+                        <div class="w-12 h-12 shrink-0 bg-white/10 rounded-2xl flex items-center justify-center border border-white/20 shadow-inner">
+                            <i class="ph-fill ph-quotes text-2xl text-emerald-400"></i>
+                        </div>
+                        <div class="flex-1 text-center sm:text-left">
+                            <h3 class="text-lg font-bold mb-1 flex items-center justify-center sm:justify-start gap-2">
+                                Daily Coaching Moment <i class="ph-bold ph-arrow-right text-sm text-emerald-400 opacity-0 -translate-x-2 group-hover:opacity-100 group-hover:translate-x-0 transition-all"></i>
+                            </h3>
+                            <p class="text-sm text-slate-300 font-medium">Click to unlock today's mindset calibration from a top expert.</p>
+                        </div>
+                    </button>
+
+                    <!-- DAILY MICRO-CHALLENGE -->
+                    <div class="bg-amber-50/50 rounded-3xl shadow-sm border border-amber-100 p-6 md:p-8">
+                        <div class="flex items-center gap-2 mb-4">
+                            <div class="p-1.5 bg-amber-100 text-amber-600 rounded-lg"><i class="ph-bold ph-sun text-sm"></i></div>
+                            <h3 class="font-bold text-slate-800 text-lg">Daily Micro-Challenge</h3>
+                            <span class="ml-auto text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-md border border-amber-100">+10 XP</span>
+                        </div>
+                        <div class="flex gap-4 items-center bg-white border border-slate-200 p-4 md:p-5 rounded-2xl shadow-sm hover:border-amber-200 transition-colors">
+                            <div class="pt-0.5">
+                                <input type="checkbox" id="cb-daily" class="task-cb" style="accent-color: #f59e0b; border-color: #fcd34d;">
+                            </div>
+                            <div class="flex-1">
+                                <p class="text-sm md:text-base font-bold text-slate-900" id="daily-task-text">Drink 16oz of water immediately upon waking.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- WEEKLY PROTOCOL -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="bg-slate-50 border-b border-slate-100 px-6 py-4 flex items-center justify-between">
+                            <h3 class="font-bold text-slate-800">Weekly Engine</h3>
+                            <span class="text-[10px] font-bold text-slate-500 uppercase tracking-widest bg-white px-2 py-1 rounded shadow-sm border border-slate-200" id="weekly-week-indicator">Week 1</span>
+                        </div>
+                        <div class="p-6 md:p-8 relative min-h-[350px]">
+                            <div class="matrix-loading-overlay active" id="protocol-loader">
+                                <i class="ph-bold ph-spinner-gap text-3xl text-emerald-500 animate-spin mb-3"></i>
+                                <p class="text-slate-900 font-bold">Fetching Protocol...</p>
+                            </div>
+
+                            <div id="protocol-content" class="opacity-0 transition-opacity duration-300">
+                                <!-- Knowledge Module -->
+                                <div class="mb-8">
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Learn Phase</h4>
+                                        <span class="ml-auto text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded border border-blue-100">+25 XP</span>
+                                    </div>
+                                    <div class="flex gap-4 items-start bg-slate-50 border border-slate-100 p-5 rounded-2xl">
+                                        <div class="pt-0.5">
+                                            <input type="checkbox" id="cb-learn" class="task-cb" style="border-color: #bfdbfe;">
+                                        </div>
+                                        <div class="flex-1">
+                                            <h4 class="font-bold text-slate-900 mb-1 text-sm" id="learn-title">Loading...</h4>
+                                            <p class="text-xs text-slate-600 mb-3 leading-relaxed" id="learn-desc">Loading...</p>
+                                            <a href="#" id="learn-link" target="_blank" class="inline-flex items-center gap-1.5 text-xs font-bold text-blue-600 hover:text-blue-700 transition-colors">
+                                                Access Source Material <i class="ph-bold ph-arrow-up-right"></i>
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <!-- Action Module -->
+                                <div>
+                                    <div class="flex items-center gap-2 mb-3">
+                                        <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Habit Loop</h4>
+                                        <span class="ml-auto text-[10px] font-bold text-emerald-600 bg-emerald-50 px-2 py-1 rounded border border-emerald-100">+50 XP</span>
+                                    </div>
+                                    <div class="flex gap-4 items-start bg-slate-900 border border-slate-800 p-5 rounded-2xl">
+                                        <div class="pt-0.5">
+                                            <input type="checkbox" id="cb-do" class="task-cb" style="border-color: #475569;">
+                                        </div>
+                                        <div class="flex-1 space-y-3">
+                                            <div>
+                                                <span class="text-[9px] font-bold text-emerald-400 uppercase tracking-wider block mb-0.5">Cue</span>
+                                                <span class="text-xs text-slate-300" id="do-cue">...</span>
+                                            </div>
+                                            <div class="pl-3 border-l-2 border-slate-700">
+                                                <span class="text-[9px] font-bold text-blue-400 uppercase tracking-wider block mb-0.5">Response</span>
+                                                <span class="text-xs font-semibold text-white" id="do-resp">...</span>
+                                            </div>
+                                            <div>
+                                                <span class="text-[9px] font-bold text-rose-400 uppercase tracking-wider block mb-0.5">Reward</span>
+                                                <span class="text-xs text-slate-300" id="do-rew">...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- DIAGNOSTICS VAULT -->
+                    <div class="bg-indigo-50/40 rounded-3xl shadow-sm border border-indigo-100 p-6 md:p-8 relative overflow-hidden">
+                        <div class="flex items-center gap-3 mb-4">
+                            <div class="p-2 bg-indigo-100 text-indigo-600 rounded-xl"><i class="ph-bold ph-shield-check text-xl"></i></div>
+                            <h2 class="text-xl font-bold text-slate-900">Level <span id="diag-level-title">100</span> Diagnostics</h2>
+                        </div>
+                        <p class="text-slate-600 text-sm mb-6 leading-relaxed">
+                            These are the <strong class="text-slate-900">hard gates</strong> required to officially clear this level. Complete these at any point during your 30-day protocol.
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <!-- Health Milestone -->
+                            <div class="flex gap-4 items-start bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+                                <div class="pt-0.5">
+                                    <input type="checkbox" id="cb-diag-health" class="task-cb" style="border-color: #c7d2fe;">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start mb-1.5">
+                                        <h4 class="font-bold text-slate-900 flex items-center gap-2"><i class="ph-fill ph-heartbeat text-rose-500"></i> Clinical Milestone</h4>
+                                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">+150 XP</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 font-medium leading-snug" id="diag-health-desc">Loading baseline health requirements...</p>
+                                </div>
+                            </div>
+
+                            <!-- Wealth Milestone -->
+                            <div class="flex gap-4 items-start bg-white border border-slate-200 p-5 rounded-2xl shadow-sm">
+                                <div class="pt-0.5">
+                                    <input type="checkbox" id="cb-diag-wealth" class="task-cb" style="border-color: #c7d2fe;">
+                                </div>
+                                <div class="flex-1">
+                                    <div class="flex justify-between items-start mb-1.5">
+                                        <h4 class="font-bold text-slate-900 flex items-center gap-2"><i class="ph-fill ph-coins text-amber-500"></i> Financial Milestone</h4>
+                                        <span class="text-xs font-bold text-indigo-600 bg-indigo-50 px-2 py-1 rounded-md border border-indigo-100">+150 XP</span>
+                                    </div>
+                                    <p class="text-sm text-slate-600 font-medium leading-snug" id="diag-wealth-desc">Loading baseline wealth requirements...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Right Column: Leaderboard & Community -->
+                <div class="space-y-6">
+                    
+                    <!-- Leaderboard Card -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 overflow-hidden">
+                        <div class="p-6 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
+                            <h2 class="text-xl font-bold text-slate-900">Cohort Rankings</h2>
+                            <i class="ph-fill ph-trophy text-amber-500 text-xl"></i>
+                        </div>
+                        <div class="bg-slate-50 border-b border-slate-100 py-2 px-4">
+                            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-widest text-center" id="lb-journey-name">Global Leaderboard</p>
+                        </div>
+                        <ul class="divide-y divide-slate-100" id="leaderboard-list">
+                            <!-- Populated by JS -->
+                        </ul>
+                    </div>
+
+                    <!-- Accountability Hub Card -->
+                    <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6">
+                        <h3 class="font-bold text-slate-900 mb-2 flex items-center gap-2">
+                            <i class="ph-bold ph-users-three text-blue-500 text-lg"></i> Accountability Hub
+                        </h3>
+                        <p class="text-xs text-slate-500 mb-5 leading-relaxed">Showing up is easier together. Join a cohort, share your progress, or challenge your friends.</p>
+                        
+                        <div class="space-y-3">
+                            <button class="w-full py-2.5 bg-blue-50 text-blue-700 hover:bg-blue-100 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2 group">
+                                <i class="ph-bold ph-magnifying-glass-plus text-base group-hover:scale-110 transition-transform"></i> Find a Community
+                            </button>
+                            <button id="btn-publish-results" class="w-full py-2.5 bg-emerald-50 text-emerald-700 hover:bg-emerald-100 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2 group">
+                                <i id="icon-publish" class="ph-bold ph-globe-hemisphere-west text-base group-hover:scale-110 transition-transform"></i> <span id="text-publish">Publish to Leaderboard</span>
+                            </button>
+                            <button class="w-full py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 font-bold rounded-xl text-xs transition-colors flex items-center justify-center gap-2 group">
+                                <i class="ph-bold ph-lock-key text-base group-hover:scale-110 transition-transform"></i> Private Leaderboard
+                            </button>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
         </main>
     </div>
 
@@ -438,13 +445,12 @@
         // ---------------------------------------------------------
         // DOM ELEMENTS & VARIABLES
         // ---------------------------------------------------------
-        // Views
         const viewLogin = document.getElementById('view-login');
         const viewOnboarding = document.getElementById('view-onboarding');
-        const viewJourney = document.getElementById('view-journey');
-        const viewPartner = document.getElementById('view-partner');
+        const viewAssessment = document.getElementById('view-assessment');
+        const viewDashboard = document.getElementById('view-dashboard');
         
-        // Login Elements
+        // Login
         const loginBtn = document.getElementById('login-btn');
         const passwordInput = document.getElementById('access-code-input');
         const loginError = document.getElementById('login-error');
@@ -463,14 +469,80 @@
         const assessmentContainer = document.getElementById('assessment-questions');
         const calculateBtn = document.getElementById('calculate-level-btn');
         const calculationResult = document.getElementById('calculation-result');
-        const currentLevelDisplay = document.getElementById('current-level-display');
-
-        // Matrix & Journey UI
-        const levelSlider = document.getElementById('level-slider');
-        const loader = document.getElementById('matrix-loader');
         
+        // Dashboard UI
+        const protocolLoader = document.getElementById('protocol-loader');
+        const protocolContent = document.getElementById('protocol-content');
+        
+        const cbDaily = document.getElementById('cb-daily');
+        const cbLearn = document.getElementById('cb-learn');
+        const cbDo = document.getElementById('cb-do');
+        const cbDiagHealth = document.getElementById('cb-diag-health');
+        const cbDiagWealth = document.getElementById('cb-diag-wealth');
+        
+        const dashXp = document.getElementById('dash-xp');
+        const headerXp = document.getElementById('header-xp');
+        const progressBarFill = document.getElementById('progress-bar-fill');
+        const leaderboardList = document.getElementById('leaderboard-list');
+        const btnPublishResults = document.getElementById('btn-publish-results');
+
+        // Modal
+        const modal = document.getElementById('coaching-modal');
+        const modalContent = document.getElementById('coaching-modal-content');
+        const btnCoaching = document.getElementById('btn-coaching');
+        const btnCloseModal = document.getElementById('close-modal-btn');
+        const quoteText = document.getElementById('quote-text');
+        const quoteAuthor = document.getElementById('quote-author');
+        const quoteCategory = document.getElementById('quote-category');
+
         // State
         let currentJourneyVal = 50;
+        let currentLevel = 100;
+        let currentDay = 1;
+        let userXP = 0;
+        const MAX_LEVEL_XP = 900; 
+        // Logic: Daily(10x30=300) + Learn(25x4=100) + Do(50x4=200) + Diag(150x2=300) = 900 XP max.
+        
+        // In-Memory Progress Tracking
+        let progressState = {};
+
+        // ---------------------------------------------------------
+        // DAILY CONTENT ARRAYS
+        // ---------------------------------------------------------
+        const DAILY_CHALLENGES = [
+            "Drink 16oz of water immediately upon waking.", "Take a 10-minute walk outside without a phone.", "Text a friend to tell them you appreciate them.", "Spend 5 minutes in absolute, unguided silence.", "Eat 30g of protein within an hour of waking.",
+            "No screens for the first 30 minutes of your day.", "Do 15 bodyweight squats during a work break.", "Write down one thing you are genuinely grateful for.", "Take 5 deep physiological sighs when feeling stressed.", "Read 10 pages of a non-fiction book.",
+            "Have a completely tech-free meal.", "Go to bed 30 minutes earlier than usual.", "Compliment a stranger or coworker.", "Substitute one processed snack with a whole food.", "Review your budget or bank accounts for 5 minutes.",
+            "Do a 10-minute stretching or yoga routine.", "Avoid caffeine for the first 90 minutes of the day.", "Spend 15 minutes organizing your physical workspace.", "Call a family member just to check in.", "Do a 10-minute Non-Sleep Deep Rest (NSDR) protocol.",
+            "Ensure you get direct sunlight in your eyes before 9 AM.", "Cancel one non-essential subscription or obligation.", "Eat a serving of fermented foods (yogurt, kimchi).", "Do a high-intensity burst (e.g., 50 jumping jacks).", "Practice active listening in your next conversation.",
+            "Write down your top priority for tomorrow before sleeping.", "Do a 2-minute cold shower or cold exposure.", "Avoid consuming any calories 3 hours before bed.", "Identify and challenge one negative thought pattern.", "Reflect on your progress over the last 30 days."
+        ];
+
+        const NOWGEVITY_QUOTES = [
+            { t: "Realize deeply that the present moment is all you have.", a: "Eckhart Tolle" },
+            { t: "We suffer more often in imagination than in reality.", a: "Seneca" },
+            { t: "Life is available only in the present moment.", a: "Thich Nhat Hanh" },
+            { t: "Do not let the behavior of others destroy your inner peace.", a: "Dalai Lama" },
+            { t: "Vulnerability is not winning or losing; it's having the courage to show up.", a: "Brené Brown" },
+            { t: "Daring to set boundaries is about having the courage to love ourselves.", a: "Brené Brown" },
+            { t: "Quality of life is strictly tied to quality of relationships.", a: "Esther Perel" },
+            { t: "The art of living lies less in eliminating our troubles than in growing with them.", a: "Bernard Baruch" },
+            { t: "Joy comes to us in ordinary moments. We risk missing out when we get too busy chasing down the extraordinary.", a: "Brené Brown" },
+            { t: "The primary cause of unhappiness is never the situation but your thoughts about it.", a: "Eckhart Tolle" }
+        ];
+
+        const LONGEVITY_QUOTES = [
+            { t: "Aging is a disease, and that disease is treatable.", a: "David Sinclair" },
+            { t: "The goal is not to live forever, but to live optimally for as long as possible.", a: "Peter Attia" },
+            { t: "Exercise is by far the most potent longevity 'drug'.", a: "Peter Attia" },
+            { t: "What we eat, how much we eat, and when we eat profoundly affects our lifespan.", a: "Valter Longo" },
+            { t: "Sleep is the greatest legal performance-enhancing drug that most people are neglecting.", a: "Matthew Walker" },
+            { t: "We are not victims of our aging genes; we can control our epigenetic destiny.", a: "David Sinclair" },
+            { t: "The best time to plant a tree was 20 years ago. The best time to build your health span is today.", a: "Unknown" },
+            { t: "Longevity is not about adding years to your life, but life to your years.", a: "Valter Longo" },
+            { t: "Your biological age is a reflection of your daily habits, not your birth year.", a: "Dr. Mark Hyman" },
+            { t: "Prevention is the ultimate cure. Catch the decline before it catches you.", a: "Peter Attia" }
+        ];
 
         // ---------------------------------------------------------
         // LOGIN GATE LOGIC
@@ -485,9 +557,7 @@
                 setTimeout(() => {
                     viewLogin.classList.add('hidden');
                     viewOnboarding.classList.remove('hidden');
-                    setTimeout(() => {
-                        viewOnboarding.classList.remove('opacity-0');
-                    }, 50);
+                    setTimeout(() => viewOnboarding.classList.remove('opacity-0'), 50);
                 }, 500);
             } else {
                 loginError.classList.remove('opacity-0');
@@ -498,164 +568,70 @@
                 setTimeout(() => passwordInput.classList.replace('translate-x-2', 'translate-x-0'), 300);
             }
         }
-
         loginBtn.addEventListener('click', handleLogin);
-        passwordInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') handleLogin();
-            loginError.classList.add('opacity-0');
-        });
+        passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); loginError.classList.add('opacity-0'); });
 
         // ---------------------------------------------------------
-        // GOOGLE SHEETS DATABASE INTEGRATION
+        // GOOGLE SHEETS & FALLBACK LOGIC
         // ---------------------------------------------------------
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwP4c_8wCC_LTEWkxP7vG2MB9hzD2xloWRFAoEE1G1Atr8DQUMyH6nevvOcgIwBt5vGbrvY0s90rAz/pub?gid=43139328&single=true&output=csv"; 
         let sheetDatabase = []; 
 
-        async function loadDatabase() {
-            Papa.parse(GOOGLE_SHEET_CSV_URL, {
-                download: true,
-                header: true,
-                complete: function(results) {
-                    sheetDatabase = results.data;
-                    console.log("Nudge Database Synced from Google Sheets:", sheetDatabase);
-                },
-                error: function(err) {
-                    console.error("Error loading Google Sheet:", err);
-                }
-            });
-        }
-        loadDatabase();
+        Papa.parse(GOOGLE_SHEET_CSV_URL, {
+            download: true, header: true,
+            complete: function(results) { sheetDatabase = results.data; }
+        });
+
+        const FALLBACK_DIAGNOSTICS = {
+            health: {
+                100: "Complete Standard Bloodwork Panel (Lipids, Fasting Glucose, CBC, Vit D).",
+                200: "Track daily resting heart rate and BMI/weight baseline for 30 days.",
+                300: "Complete Advanced Bloodwork (ApoB, Lp(a), HbA1c) and schedule a DEXA Scan.",
+                400: "Wear a Continuous Glucose Monitor (CGM) for 14 days or complete a VO2 Max test.",
+                500: "Complete Epigenetic Methylation Testing or a Whole-Body preventative MRI."
+            },
+            wealth: {
+                100: "Calculate exact monthly Burn Rate and establish baseline living expenses.",
+                200: "Establish a 3-to-6 month liquid emergency fund in a High-Yield Savings Account.",
+                300: "Calculate exact Net Worth and max out current year's tax-advantaged accounts.",
+                400: "Run a 100-year Monte Carlo simulation on your portfolio withdrawal rates.",
+                500: "Establish formal estate planning, living wills, and explore trust structures."
+            }
+        };
 
         function getMatrixData(journey, level) {
             const row = sheetDatabase.find(r => r.Journey == journey && r.Level == level);
-            if (row) return row;
-            return {
-                Learn_Today_Title: "Content Loading", Learn_Today_Desc: "Checking the Nudge database...", Learn_Today_URL: "#",
-                Learn_Week_Title: "Content Loading", Learn_Week_Desc: "Checking the Nudge database...", Learn_Week_URL: "#",
-                Learn_Month_Title: "Content Loading", Learn_Month_Desc: "Checking the Nudge database...", Learn_Month_URL: "#",
+            let dataObj = {
+                Learn_Today_Title: "Content Loading", Learn_Today_Desc: "Checking database...", Learn_Today_URL: "#",
+                Learn_Week_Title: "Content Loading", Learn_Week_Desc: "Checking database...", Learn_Week_URL: "#",
+                Learn_Month_Title: "Content Loading", Learn_Month_Desc: "Checking database...", Learn_Month_URL: "#",
                 Do_Today_Cue: "...", Do_Today_Resp: "...", Do_Today_Rew: "...",
                 Do_Week_Cue: "...", Do_Week_Resp: "...", Do_Week_Rew: "...",
                 Do_Month_Cue: "...", Do_Month_Resp: "...", Do_Month_Rew: "..."
             };
+            if (row) { dataObj = { ...dataObj, ...row }; }
+            dataObj.Required_Health_Diagnostic = dataObj.Required_Health_Diagnostic || FALLBACK_DIAGNOSTICS.health[level] || "Pending requirements.";
+            dataObj.Required_Wealth_Diagnostic = dataObj.Required_Wealth_Diagnostic || FALLBACK_DIAGNOSTICS.wealth[level] || "Pending requirements.";
+            return dataObj;
         }
 
         // ---------------------------------------------------------
-        // CALIBRATION ENGINE (The 8 Harsh Questions)
-        // ---------------------------------------------------------
-        const ASSESSMENT_QUESTIONS = {
-            0: [
-                "Have you done a basic mental health check-in recently (e.g., with a counselor or self-audit)?",
-                "Do you generally prioritize your mental well-being, take walks, and hang out with friends?",
-                "Have you read seminal books on presence (e.g., Brené Brown, Eckhart Tolle) and know your stress triggers?",
-                "Do you actively and strictly track your digital screen time and enforce tech-free boundaries?",
-                "Do you have a deeply connected, close friend group you prioritize and could talk to about almost anything?",
-                "Do you have a dedicated therapist or relational coach actively engaged in your mental/social wellness plan?",
-                "Are daily mindfulness, joy-sourcing, and nervous-system regulation practices strictly entrenched in your life?",
-                "Are you living at the edge of present-moment mastery (attending intensive retreats, studying with top spiritual guides)?"
-            ],
-            25: [
-                "Have you done basic bloodwork and set up a simple automated savings plan recently?",
-                "Do you use a wearable to monitor your sleep/activity, and generally try to eat well and move daily?",
-                "Have you read key books on balancing life/health, and do you know your basic metabolic markers?",
-                "Do you precisely track your budget and intentionally block off specific calendar time for physical recovery?",
-                "Do you have a close-knit group of friends you prioritize and could talk to about almost anything?",
-                "Have you discussed a holistic, long-term wellness and lifestyle plan with your primary care doctor?",
-                "Is a balanced routine of stress-reduction, light exercise, and intentional spending deeply entrenched in your week?",
-                "Do you actively attend wellness retreats or consult directly with top-tier lifestyle design experts?"
-            ],
-            50: [
-                "Have you recently done baseline bloodwork and basic financial planning questionnaires?",
-                "Do you wear a fitness tracker (Oura, Apple Watch, Garmin) and generally work out and eat well?",
-                "Have you read the seminal books on this topic (e.g., Peter Attia's 'Outlive') and know your core biomarkers?",
-                "Do you work out and eat in a strictly tracked fashion (e.g., logging macros, specific Zone 2 cardio targets)?",
-                "Do you have a close-knit group of friends you prioritize and could talk to about almost anything?",
-                "Do you have a dedicated medical team or specialist actively engaged in a personalized health plan with you?",
-                "Is your tailored exercise, nutrition, and curated supplement protocol deeply entrenched into your daily life?",
-                "Are you living at the absolute edge of this space (attending longevity conferences, working with top experts)?"
-            ],
-            75: [
-                "Have you recently completed comprehensive bloodwork (including ApoB) and mapped your long-term wealth trajectory?",
-                "Do you wear an advanced tracker, consistently hit your workout macros, and optimize your sleep environment?",
-                "Have you read deeply into longevity science and know your advanced biomarkers (hs-CRP, Homocysteine, VO2 max)?",
-                "Have you used a Continuous Glucose Monitor (CGM) or practice strict, tracked metabolic fasting?",
-                "Do you have a solid network of like-minded, high-performing friends to hold you accountable?",
-                "Do you have a specialized longevity doctor or clinic actively overseeing your physical decline prevention plan?",
-                "Are advanced protocols (tax-loss harvesting, DEXA scans, curated supplement stacks) completely entrenched in your year?",
-                "Are you at the edge of performance science (attending longevity summits, doing epigenetic testing)?"
-            ],
-            100: [
-                "Have you completed exhaustive clinical blood panels and established a ruthless baseline of your net worth?",
-                "Do you track and log almost every biological input (macros, micronutrients, sleep architecture, HRV)?",
-                "Have you read the clinical science of cellular aging and understand mTOR/IGF-1 signaling pathways?",
-                "Have you done comprehensive whole-genome sequencing or epigenetic methylation testing?",
-                "Are you part of a highly specialized, elite community of biohackers or life-extension enthusiasts?",
-                "Do you have a dedicated medical board or family office orchestrating a hyper-personalized life extension protocol?",
-                "Are pharmacological longevity interventions (e.g., off-label Rapamycin, peptides) entrenched in your protocol?",
-                "Are you living at the bleeding edge (funding research, attending elite summits, experimenting with next-gen therapies)?"
-            ]
-        };
-
-        function renderAssessment(journeyVal) {
-            const questions = ASSESSMENT_QUESTIONS[journeyVal];
-            assessmentContainer.innerHTML = ''; 
-            
-            questions.forEach((q, index) => {
-                const label = document.createElement('label');
-                label.className = "flex items-start gap-3 cursor-pointer p-3 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 transition-colors";
-                label.innerHTML = `
-                    <div class="flex items-center h-5 mt-0.5">
-                        <input type="checkbox" class="w-5 h-5 bg-white border-slate-300 rounded assessment-cb cursor-pointer">
-                    </div>
-                    <div class="text-sm text-slate-700 font-medium leading-tight">${q}</div>
-                `;
-                assessmentContainer.appendChild(label);
-            });
-
-            calculationResult.classList.add('hidden');
-            calculationResult.classList.remove('opacity-100');
-        }
-
-        // The Harsh Scoring Logic
-        calculateBtn.addEventListener('click', () => {
-            const checkboxes = document.querySelectorAll('.assessment-cb');
-            let checkedCount = 0;
-            checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
-            
-            let suggestedLevel = 100;
-            if (checkedCount >= 8) suggestedLevel = 500;
-            else if (checkedCount >= 6) suggestedLevel = 400;
-            else if (checkedCount >= 4) suggestedLevel = 300;
-            else if (checkedCount >= 2) suggestedLevel = 200;
-
-            levelSlider.value = suggestedLevel;
-            currentLevelDisplay.textContent = `Level ${suggestedLevel}`;
-            updateMatrix(currentJourneyVal, suggestedLevel);
-
-            calculationResult.textContent = `✓ We've calibrated your start to Level ${suggestedLevel}.`;
-            calculationResult.classList.remove('hidden');
-            setTimeout(() => calculationResult.classList.add('opacity-100'), 50);
-
-            levelSlider.classList.add('scale-[1.02]');
-            setTimeout(() => levelSlider.classList.remove('scale-[1.02]'), 300);
-        });
-
-        // ---------------------------------------------------------
-        // ONBOARDING PERSONA ENGINE
+        // ONBOARDING & PERSONA ENGINE
         // ---------------------------------------------------------
         const JOURNEYS = {
-            0: { name: "The Present Maximizer", shortDesc: "Anchoring in the current moment, prioritizing immediate joy, connection, and wholeheartedness.", icon: "ph-flower-lotus", colorClass: "text-rose-500", bgClass: "bg-rose-50 border-rose-100" },
-            25: { name: "The Mindful Explorer", shortDesc: "Protecting your peace and prioritizing current lifestyle, with a mindful eye on the horizon.", icon: "ph-binoculars", colorClass: "text-amber-500", bgClass: "bg-amber-50 border-amber-100" },
-            50: { name: "The Nudge Architect", shortDesc: "Building a formidable physical and financial runway without sacrificing the magic of today.", icon: "ph-scales", colorClass: "text-emerald-500", bgClass: "bg-emerald-50 border-emerald-100" },
-            75: { name: "The Optimized Forward-Thinker", shortDesc: "Highly disciplined, treating the body and assets as compounding machines for a limitless tomorrow.", icon: "ph-rocket-launch", colorClass: "text-blue-500", bgClass: "bg-blue-50 border-blue-100" },
-            100: { name: "The Terminal Optimizer", shortDesc: "Ruthlessly dedicated to life extension, strictly engineering every biomarker and asset for maximum future yield.", icon: "ph-dna", colorClass: "text-indigo-500", bgClass: "bg-indigo-50 border-indigo-100" }
+            0: { name: "The Present Maximizer", shortDesc: "Prioritizing immediate joy, connection, and wholeheartedness.", icon: "ph-flower-lotus", colorClass: "text-rose-500", bgClass: "bg-rose-50 border-rose-100" },
+            25: { name: "The Mindful Explorer", shortDesc: "Protecting your peace with a mindful eye on the horizon.", icon: "ph-binoculars", colorClass: "text-amber-500", bgClass: "bg-amber-50 border-amber-100" },
+            50: { name: "The Nudge Architect", shortDesc: "Building a formidable physical/financial runway without sacrificing today.", icon: "ph-scales", colorClass: "text-emerald-500", bgClass: "bg-emerald-50 border-emerald-100" },
+            75: { name: "The Optimized Forward-Thinker", shortDesc: "Treating the body and assets as compounding machines for tomorrow.", icon: "ph-rocket-launch", colorClass: "text-blue-500", bgClass: "bg-blue-50 border-blue-100" },
+            100: { name: "The Terminal Optimizer", shortDesc: "Ruthlessly engineering every biomarker and asset for maximum future yield.", icon: "ph-dna", colorClass: "text-indigo-500", bgClass: "bg-indigo-50 border-indigo-100" }
         };
 
         const personaData = {
-            0: { title: "Your Journey Focus: 100% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Present Maximizer.</strong> You want to fully anchor in the current moment, prioritizing immediate joy, connection, and wholeheartedness over future optimization.", icon: "ph-flower-lotus", color: "text-rose-500" },
-            25: { title: "Your Journey Focus: 25% Longevity / 75% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Mindful Explorer.</strong> You want to protect your peace and prioritize your current lifestyle and relationships, while keeping just enough of an eye on the horizon to stay safe.", icon: "ph-binoculars", color: "text-amber-500" },
-            50: { title: "Your Journey Focus: 50% Longevity / 50% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Nudge Architect.</strong> You are seeking the ultimate equilibrium. You want to build a formidable physical and financial runway without sacrificing the magic of today.", icon: "ph-scales", color: "text-emerald-500" },
-            75: { title: "Your Journey Focus: 75% Longevity / 25% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Optimized Forward-Thinker.</strong> You want to be highly disciplined, treating your body and assets as compounding machines, making calculated sacrifices today for a limitless tomorrow.", icon: "ph-rocket-launch", color: "text-blue-500" },
-            100: { title: "Your Journey Focus: 100% Longevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Terminal Optimizer.</strong> You want to ruthlessly dedicate yourself to the science of life extension, strictly engineering every input, biomarker, and asset for maximum future yield.", icon: "ph-dna", color: "text-indigo-500" }
+            0: { title: "Your Journey Focus: 100% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Present Maximizer.</strong>", icon: "ph-flower-lotus", color: "text-rose-500" },
+            25: { title: "Your Journey Focus: 25% Longevity / 75% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Mindful Explorer.</strong>", icon: "ph-binoculars", color: "text-amber-500" },
+            50: { title: "Your Journey Focus: 50% Longevity / 50% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Nudge Architect.</strong>", icon: "ph-scales", color: "text-emerald-500" },
+            75: { title: "Your Journey Focus: 75% Longevity / 25% Nowgevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Optimized Forward-Thinker.</strong>", icon: "ph-rocket-launch", color: "text-blue-500" },
+            100: { title: "Your Journey Focus: 100% Longevity", desc: "<strong class='text-slate-900 font-semibold mr-1'>The Terminal Optimizer.</strong>", icon: "ph-dna", color: "text-indigo-500" }
         };
 
         mainSlider.addEventListener('input', () => {
@@ -665,131 +641,304 @@
             
             focusTitleContainer.style.opacity = '0';
             focusDesc.style.opacity = '0';
-            
             setTimeout(() => {
                 focusTitle.textContent = personaData[val].title;
-                focusDesc.innerHTML = personaData[val].desc;
-                
+                focusDesc.innerHTML = `${personaData[val].desc} ${JOURNEYS[val].shortDesc}`;
                 focusIcon.className = `ph-fill ${personaData[val].icon} ${personaData[val].color} text-lg`;
-                
                 focusTitleContainer.style.opacity = '1';
                 focusDesc.style.opacity = '1';
             }, 150);
         });
 
-        // ---------------------------------------------------------
-        // ROUTING LOGIC
-        // ---------------------------------------------------------
         startBtn.addEventListener('click', () => {
             currentJourneyVal = parseInt(mainSlider.value);
             const journeyData = JOURNEYS[currentJourneyVal];
             
-            document.getElementById('journey-title').textContent = journeyData.name;
-            document.getElementById('journey-subtitle').textContent = journeyData.shortDesc;
-            document.getElementById('community-name').textContent = journeyData.name;
-            
-            const journeyPageIcon = document.getElementById('journey-page-icon');
-            const journeyIconContainer = document.getElementById('journey-icon-container');
-            journeyPageIcon.className = `ph-fill ${journeyData.icon} text-4xl ${journeyData.colorClass}`;
-            journeyIconContainer.className = `w-20 h-20 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border ${journeyData.bgClass}`;
+            document.getElementById('assessment-page-icon').className = `ph-fill ${journeyData.icon} text-3xl ${journeyData.colorClass}`;
+            document.getElementById('assessment-icon-container').className = `w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border ${journeyData.bgClass}`;
 
-            document.getElementById('level-slider').value = 100;
-            currentLevelDisplay.textContent = "Level 100";
             renderAssessment(currentJourneyVal);
-            updateMatrix(currentJourneyVal, 100);
 
             viewOnboarding.classList.add('opacity-0');
             setTimeout(() => {
                 viewOnboarding.classList.add('hidden');
-                viewJourney.classList.remove('hidden');
+                viewAssessment.classList.remove('hidden');
                 window.scrollTo(0, 0);
-                void viewJourney.offsetWidth;
-                viewJourney.classList.remove('opacity-0');
+                setTimeout(() => viewAssessment.classList.remove('opacity-0'), 50);
             }, 500);
         });
 
-        document.getElementById('back-btn').addEventListener('click', () => {
-            viewJourney.classList.add('opacity-0');
-            setTimeout(() => {
-                viewJourney.classList.add('hidden');
-                viewOnboarding.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                viewOnboarding.classList.remove('opacity-0');
-            }, 500);
-        });
-
-        document.getElementById('open-partner-btn').addEventListener('click', () => {
-            viewOnboarding.classList.add('opacity-0');
-            setTimeout(() => {
-                viewOnboarding.classList.add('hidden');
-                viewPartner.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                void viewPartner.offsetWidth;
-                viewPartner.classList.remove('opacity-0');
-            }, 500);
-        });
-
-        const goBackToAssessment = () => {
-            viewPartner.classList.add('opacity-0');
-            setTimeout(() => {
-                viewPartner.classList.add('hidden');
-                viewOnboarding.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                viewOnboarding.classList.remove('opacity-0');
-            }, 500);
+        // ---------------------------------------------------------
+        // CALIBRATION AUDIT (Level Assessment - Strict)
+        // ---------------------------------------------------------
+        const ASSESSMENT_QUESTIONS = {
+            0: ["Have you done a basic mental health check-in recently?", "Do you consciously prioritize daily activities that bring you immediate joy?", "Have you read seminal books on presence (e.g., Brené Brown, Eckhart Tolle)?", "Do you actively and strictly track your digital screen time?", "Do you have a deeply connected friend group you can talk to about almost anything?", "Do you regularly work with a dedicated therapist or relational coach?", "Are daily mindfulness and joy-sourcing practices strictly entrenched in your life?", "Are you living at the edge of present-moment mastery (e.g., attending intensive retreats)?"],
+            25: ["Have you done basic baseline bloodwork in the last 12 months?", "Do you have a basic automated savings plan or emergency fund set up?", "Do you use a wearable device to passively monitor your sleep and activity levels?", "Have you read key books on finding a sustainable balance between health and lifestyle?", "Do you have a close-knit group of friends who support your balanced lifestyle?", "Have you discussed a holistic, long-term wellness plan with your primary care doctor?", "Is a balanced routine of stress-reduction deeply entrenched in your week?", "Do you actively attend wellness retreats or consult directly with lifestyle design experts?"],
+            50: ["Have you had baseline bloodwork done recently that includes metabolic markers?", "Do you automatically invest a set percentage of your income into index funds?", "Have you read seminal books on longevity (e.g., Peter Attia's 'Outlive')?", "Do you get at least 150 minutes of targeted Zone 2 cardio training per week?", "Do you have a close-knit group of friends you prioritize and trust deeply?", "Do you have a specialized medical team engaged in a preventative health plan with you?", "Is your tailored exercise, nutrition, and curated supplement protocol entrenched?", "Are you living at the edge of this space (attending longevity conferences, working with experts)?"],
+            75: ["Have you completed comprehensive blood panels that explicitly test ApoB and hs-CRP?", "Have you mapped your long-term wealth trajectory using dynamic withdrawal strategies?", "Have you read the clinical science on longevity and cellular aging pathways (e.g., mTOR)?", "Have you ever used a Continuous Glucose Monitor (CGM) to map metabolic responses?", "Do you have a solid network of like-minded, high-performing friends for accountability?", "Do you have a specialized longevity doctor actively overseeing your physical decline prevention plan?", "Are advanced protocols (tax-loss harvesting, targeted VO2 max intervals) entrenched in your year?", "Are you at the edge of performance science (doing specific genetic testing)?"],
+            100: ["Have you completed exhaustive clinical blood panels and established a ruthless baseline of your net worth?", "Do you track and log almost every biological input (macros, micronutrients, sleep architecture)?", "Do you take advanced longevity supplements like NAD+ precursors or targeted senolytics?", "Have you taken an epigenetic methylation test to track your exact biological aging velocity?", "Are you part of a highly specialized, elite community of biohackers or life-extension enthusiasts?", "Do you have a dedicated medical board orchestrating a hyper-personalized protocol?", "Are pharmacological longevity interventions (e.g., Rapamycin, peptides) entrenched in your protocol?", "Are you living at the bleeding edge (funding research, experimenting with next-gen therapies)?"]
         };
 
-        document.getElementById('back-from-partner-btn').addEventListener('click', goBackToAssessment);
-        document.getElementById('cta-take-assessment').addEventListener('click', goBackToAssessment);
-
-        // ---------------------------------------------------------
-        // MATRIX RENDERER
-        // ---------------------------------------------------------
-        function makeValidUrl(url) {
-            if (!url || url === '#' || url.trim() === '') return '#';
-            if (!url.startsWith('http://') && !url.startsWith('https://')) return 'https://' + url;
-            return url;
+        function renderAssessment(journeyVal) {
+            const questions = ASSESSMENT_QUESTIONS[journeyVal];
+            assessmentContainer.innerHTML = ''; 
+            questions.forEach((q) => {
+                const label = document.createElement('label');
+                label.className = "flex items-start gap-3 cursor-pointer p-4 bg-slate-50 border border-slate-100 rounded-xl hover:bg-slate-100 transition-colors";
+                label.innerHTML = `
+                    <div class="flex items-center h-5 mt-0.5"><input type="checkbox" class="w-5 h-5 bg-white border-slate-300 rounded assessment-cb cursor-pointer"></div>
+                    <div class="text-sm text-slate-700 font-medium leading-tight">${q}</div>
+                `;
+                assessmentContainer.appendChild(label);
+            });
         }
 
-        function updateMatrix(journey, level) {
-            document.getElementById('matrix-header').textContent = level == 500 ? "Maintaining Mastery" : `Your Path to Level ${level + 100}`;
-            loader.classList.add('active');
+        calculateBtn.addEventListener('click', () => {
+            const checkboxes = document.querySelectorAll('.assessment-cb');
+            let checkedCount = 0;
+            checkboxes.forEach(cb => { if(cb.checked) checkedCount++; });
+            
+            // Harsh Scoring
+            if (checkedCount === 8) currentLevel = 500;
+            else if (checkedCount >= 7) currentLevel = 400;
+            else if (checkedCount >= 5) currentLevel = 300;
+            else if (checkedCount >= 3) currentLevel = 200;
+            else currentLevel = 100;
+
+            setupDashboard();
+
+            viewAssessment.classList.add('opacity-0');
+            setTimeout(() => {
+                viewAssessment.classList.add('hidden');
+                viewDashboard.classList.remove('hidden');
+                window.scrollTo(0, 0);
+                setTimeout(() => viewDashboard.classList.remove('opacity-0'), 50);
+            }, 500);
+        });
+
+        // ---------------------------------------------------------
+        // 30-DAY DASHBOARD & SCORING LOGIC
+        // ---------------------------------------------------------
+        function updateProgressUI() {
+            dashXp.textContent = userXP;
+            headerXp.textContent = `${userXP} XP`;
+            const percentage = Math.min((userXP / MAX_LEVEL_XP) * 100, 100);
+            progressBarFill.style.width = `${percentage}%`;
+            
+            // Sync Checkboxes
+            cbDaily.checked = progressState[`l${currentLevel}_d${currentDay}_daily`] || false;
+            
+            const currentWeek = Math.ceil(currentDay / 7);
+            document.getElementById('weekly-week-indicator').textContent = currentWeek > 4 ? "Mastery Week" : `Week ${currentWeek}`;
+            cbLearn.checked = progressState[`l${currentLevel}_w${currentWeek}_learn`] || false;
+            cbDo.checked = progressState[`l${currentLevel}_w${currentWeek}_do`] || false;
+
+            cbDiagHealth.checked = progressState[`l${currentLevel}_diag_health`] || false;
+            cbDiagWealth.checked = progressState[`l${currentLevel}_diag_wealth`] || false;
+
+            updateLeaderboard();
+        }
+
+        function setupDashboard() {
+            const journeyData = JOURNEYS[currentJourneyVal];
+            document.getElementById('dash-journey-name').textContent = journeyData.name;
+            document.getElementById('lb-journey-name').textContent = `${journeyData.name} Rankings`;
+            document.getElementById('dash-level').textContent = currentLevel;
+            document.getElementById('diag-level-title').textContent = currentLevel;
+            
+            document.getElementById('dash-small-icon').className = `ph-fill ${journeyData.icon} ${journeyData.colorClass}`;
+            document.getElementById('dash-bg-icon').className = `ph-fill ${journeyData.icon} text-[200px] text-slate-900`;
+
+            // Reset States
+            btnPublishResults.classList.remove('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
+            btnPublishResults.classList.add('bg-emerald-50', 'text-emerald-700', 'hover:bg-emerald-100');
+            document.getElementById('text-publish').textContent = "Publish to Leaderboard";
+            document.getElementById('icon-publish').className = "ph-bold ph-globe-hemisphere-west text-base group-hover:scale-110 transition-transform";
+
+            userXP = 0;
+            progressState = {};
+            currentDay = 1;
+            
+            loadLevelDiagnostics();
+            loadDayData();
+            updateProgressUI();
+        }
+
+        function loadLevelDiagnostics() {
+            const data = getMatrixData(currentJourneyVal, currentLevel);
+            document.getElementById('diag-health-desc').textContent = data.Required_Health_Diagnostic;
+            document.getElementById('diag-wealth-desc').textContent = data.Required_Wealth_Diagnostic;
+        }
+
+        function loadDayData() {
+            document.getElementById('dash-day-display').textContent = `Day ${currentDay} of 30`;
+            
+            // Set Daily Challenge
+            document.getElementById('daily-task-text').textContent = DAILY_CHALLENGES[currentDay - 1];
+
+            // Set Weekly Protocol based on day
+            const weekNum = Math.ceil(currentDay / 7);
+            
+            protocolLoader.classList.add('active');
+            protocolContent.classList.remove('opacity-100');
             
             setTimeout(() => {
-                const data = getMatrixData(journey, level);
+                const data = getMatrixData(currentJourneyVal, currentLevel);
+                let learnTitle, learnDesc, learnUrl, doCue, doResp, doRew;
                 
-                document.getElementById('learn-today-title').textContent = data.Learn_Today_Title;
-                document.getElementById('learn-today-desc').textContent = data.Learn_Today_Desc;
-                document.getElementById('learn-today-link').href = makeValidUrl(data.Learn_Today_URL);
+                if (weekNum === 1) {
+                    learnTitle = data.Learn_Today_Title; learnDesc = data.Learn_Today_Desc; learnUrl = data.Learn_Today_URL;
+                    doCue = data.Do_Today_Cue; doResp = data.Do_Today_Resp; doRew = data.Do_Today_Rew;
+                } else if (weekNum === 2) {
+                    learnTitle = data.Learn_Week_Title; learnDesc = data.Learn_Week_Desc; learnUrl = data.Learn_Week_URL;
+                    doCue = data.Do_Week_Cue; doResp = data.Do_Week_Resp; doRew = data.Do_Week_Rew;
+                } else if (weekNum === 3) {
+                    learnTitle = data.Learn_Month_Title; learnDesc = data.Learn_Month_Desc; learnUrl = data.Learn_Month_URL;
+                    doCue = data.Do_Month_Cue; doResp = data.Do_Month_Resp; doRew = data.Do_Month_Rew;
+                } else {
+                    learnTitle = "Integration & Diagnostics Review"; 
+                    learnDesc = "Review protocols from Weeks 1-3. Ensure your clinical and financial diagnostics are scheduled or completed.";
+                    learnUrl = "#";
+                    doCue = "Weekly Review"; 
+                    doResp = "Log your consistency for the past 21 days."; 
+                    doRew = "Clarity and readiness for the next Level.";
+                }
 
-                document.getElementById('learn-week-title').textContent = data.Learn_Week_Title;
-                document.getElementById('learn-week-desc').textContent = data.Learn_Week_Desc;
-                document.getElementById('learn-week-link').href = makeValidUrl(data.Learn_Week_URL);
+                document.getElementById('learn-title').textContent = learnTitle;
+                document.getElementById('learn-desc').textContent = learnDesc;
+                document.getElementById('learn-link').href = makeValidUrl(learnUrl);
+                document.getElementById('do-cue').textContent = doCue;
+                document.getElementById('do-resp').textContent = doResp;
+                document.getElementById('do-rew').textContent = doRew;
 
-                document.getElementById('learn-month-title').textContent = data.Learn_Month_Title;
-                document.getElementById('learn-month-desc').textContent = data.Learn_Month_Desc;
-                document.getElementById('learn-month-link').href = makeValidUrl(data.Learn_Month_URL);
+                updateProgressUI();
 
-                document.getElementById('do-today-cue').textContent = data.Do_Today_Cue;
-                document.getElementById('do-today-resp').textContent = data.Do_Today_Resp;
-                document.getElementById('do-today-rew').textContent = data.Do_Today_Rew;
-
-                document.getElementById('do-week-cue').textContent = data.Do_Week_Cue;
-                document.getElementById('do-week-resp').textContent = data.Do_Week_Resp;
-                document.getElementById('do-week-rew').textContent = data.Do_Week_Rew;
-
-                document.getElementById('do-month-cue').textContent = data.Do_Month_Cue;
-                document.getElementById('do-month-resp').textContent = data.Do_Month_Resp;
-                document.getElementById('do-month-rew').textContent = data.Do_Month_Rew;
-                
-                loader.classList.remove('active');
-            }, 400); // Small visual delay to show it's updating
+                protocolLoader.classList.remove('active');
+                setTimeout(() => protocolContent.classList.add('opacity-100'), 50);
+            }, 300);
         }
 
-        levelSlider.addEventListener('input', () => {
-            const val = parseInt(levelSlider.value);
-            currentLevelDisplay.textContent = `Level ${val}`;
-            updateMatrix(currentJourneyVal, val);
+        // Day Navigation
+        document.getElementById('day-prev').addEventListener('click', () => {
+            if(currentDay > 1) { currentDay--; loadDayData(); }
+        });
+        document.getElementById('day-next').addEventListener('click', () => {
+            if(currentDay < 30) { currentDay++; loadDayData(); }
+        });
+
+        // Checkbox Listeners
+        cbDaily.addEventListener('change', (e) => {
+            const key = `l${currentLevel}_d${currentDay}_daily`;
+            progressState[key] = e.target.checked;
+            userXP += e.target.checked ? 10 : -10;
+            updateProgressUI();
+        });
+
+        cbLearn.addEventListener('change', (e) => {
+            const weekNum = Math.ceil(currentDay / 7);
+            const key = `l${currentLevel}_w${weekNum}_learn`;
+            progressState[key] = e.target.checked;
+            userXP += e.target.checked ? 25 : -25;
+            updateProgressUI();
+        });
+
+        cbDo.addEventListener('change', (e) => {
+            const weekNum = Math.ceil(currentDay / 7);
+            const key = `l${currentLevel}_w${weekNum}_do`;
+            progressState[key] = e.target.checked;
+            userXP += e.target.checked ? 50 : -50;
+            updateProgressUI();
+        });
+
+        cbDiagHealth.addEventListener('change', (e) => {
+            progressState[`l${currentLevel}_diag_health`] = e.target.checked;
+            userXP += e.target.checked ? 150 : -150;
+            updateProgressUI();
+        });
+
+        cbDiagWealth.addEventListener('change', (e) => {
+            progressState[`l${currentLevel}_diag_wealth`] = e.target.checked;
+            userXP += e.target.checked ? 150 : -150;
+            updateProgressUI();
+        });
+
+        // ---------------------------------------------------------
+        // DAILY COACHING MODAL
+        // ---------------------------------------------------------
+        btnCoaching.addEventListener('click', () => {
+            // Pick quote randomly, biased by journey (e.g. 100=Longevity, 0=Nowgevity)
+            let quoteObj;
+            let isNowgevity = Math.random() > (currentJourneyVal / 100);
+            
+            if(isNowgevity) {
+                quoteObj = NOWGEVITY_QUOTES[Math.floor(Math.random() * NOWGEVITY_QUOTES.length)];
+                quoteCategory.textContent = "Nowgevity Focus";
+                quoteCategory.className = "font-bold text-sm text-rose-500";
+            } else {
+                quoteObj = LONGEVITY_QUOTES[Math.floor(Math.random() * LONGEVITY_QUOTES.length)];
+                quoteCategory.textContent = "Longevity Focus";
+                quoteCategory.className = "font-bold text-sm text-indigo-500";
+            }
+
+            quoteText.textContent = `"${quoteObj.t}"`;
+            quoteAuthor.textContent = quoteObj.a;
+
+            modal.classList.remove('hidden');
+            // Animate in
+            setTimeout(() => {
+                modal.classList.remove('opacity-0', 'pointer-events-none');
+                modalContent.classList.remove('scale-95');
+                modalContent.classList.add('scale-100');
+            }, 10);
+        });
+
+        btnCloseModal.addEventListener('click', () => {
+            modal.classList.add('opacity-0', 'pointer-events-none');
+            modalContent.classList.remove('scale-100');
+            modalContent.classList.add('scale-95');
+            setTimeout(() => modal.classList.add('hidden'), 300);
+        });
+
+        // ---------------------------------------------------------
+        // LEADERBOARD & ACCOUNTABILITY
+        // ---------------------------------------------------------
+        const MOCK_USERS = [
+            { name: "Sarah M.", base: 780 },
+            { name: "Alex K.", base: 640 },
+            { name: "David T.", base: 320 },
+            { name: "Elena R.", base: 890 },
+        ];
+
+        function updateLeaderboard() {
+            let combined = [...MOCK_USERS, { name: "You (Beta)", base: userXP, isUser: true }];
+            combined.sort((a, b) => b.base - a.base);
+
+            leaderboardList.innerHTML = '';
+            combined.forEach((u, index) => {
+                const li = document.createElement('li');
+                li.className = `flex items-center justify-between p-4 ${u.isUser ? 'bg-emerald-50/50' : ''}`;
+                
+                let rankVisual = `<span class="w-6 font-bold text-slate-400">${index + 1}</span>`;
+                if(index === 0) rankVisual = `<i class="ph-fill ph-medal text-amber-500 w-6 text-lg"></i>`;
+                
+                li.innerHTML = `
+                    <div class="flex items-center gap-3">
+                        ${rankVisual}
+                        <span class="font-semibold ${u.isUser ? 'text-emerald-700' : 'text-slate-700'}">${u.name}</span>
+                    </div>
+                    <span class="text-sm font-bold ${u.isUser ? 'text-emerald-600' : 'text-slate-500'}">${u.base} XP</span>
+                `;
+                leaderboardList.appendChild(li);
+            });
+        }
+
+        btnPublishResults.addEventListener('click', () => {
+            btnPublishResults.classList.remove('bg-emerald-50', 'text-emerald-700', 'hover:bg-emerald-100');
+            btnPublishResults.classList.add('bg-emerald-600', 'text-white', 'hover:bg-emerald-700');
+            document.getElementById('icon-publish').className = "ph-bold ph-check-circle text-base";
+            document.getElementById('text-publish').textContent = "Results Live";
+            btnPublishResults.classList.add('scale-[1.02]');
+            setTimeout(() => btnPublishResults.classList.remove('scale-[1.02]'), 200);
         });
 
     </script>
