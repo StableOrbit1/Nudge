@@ -49,6 +49,9 @@
 
         /* Modal Glassmorphism */
         .glass-modal { background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(12px); border: 1px solid rgba(255,255,255,0.2); }
+        
+        /* Select Input Styling */
+        select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
@@ -84,30 +87,126 @@
             </div>
             <h1 class="text-2xl font-bold tracking-tight mb-2">Private Beta Access</h1>
             <p class="text-sm text-slate-500 mb-8">Please paste your Private Welcome Link or Access Code below.</p>
+            
             <div class="space-y-4">
                 <input type="password" id="access-code-input" placeholder="Paste link or code..." class="w-full px-4 py-3 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500 focus:border-transparent transition-all text-center tracking-widest font-mono">
                 <p id="login-error" class="text-xs text-rose-500 font-semibold h-4 opacity-0 transition-opacity">Incorrect access code.</p>
                 <button id="login-btn" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-semibold py-3 px-8 rounded-xl transition-all shadow-md active:scale-[0.98]">
-                    Enter Nudge
+                    Enter
                 </button>
             </div>
         </main>
     </div>
 
-    <!-- VIEW 1: ONBOARDING SCREEN -->
+    <!-- VIEW 1: CINEMATIC WELCOME & MANIFESTO -->
+    <div id="view-welcome" class="hidden min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-700 opacity-0">
+        <main class="max-w-4xl w-full px-6 py-12 md:py-20 flex flex-col items-center">
+            
+            <!-- Stagger 1: Branding -->
+            <div id="welcome-nudge" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out flex flex-col items-center w-full text-center">
+                <div class="w-20 h-20 md:w-24 md:h-24 bg-slate-900 rounded-[2rem] mx-auto flex items-center justify-center shadow-2xl mb-8">
+                    <span class="text-white font-bold text-4xl md:text-5xl tracking-tighter">N</span>
+                </div>
+                <h1 class="text-4xl md:text-6xl font-black tracking-tight mb-3 text-slate-900 w-full">Nudge</h1>
+                <h2 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-[0.3em] pl-[0.3em] w-full">The Art & Science of Showing Up</h2>
+            </div>
+
+            <!-- Stagger 2: Manifesto -->
+            <div id="welcome-manifesto" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out mt-12 max-w-2xl mx-auto text-center space-y-6 text-slate-600 md:text-lg">
+                <p class="font-bold text-slate-900 text-xl md:text-2xl leading-relaxed text-balance mx-auto">Nudge is your companion and concierge through the journey to a happier, healthier, and hopefully longer life.</p>
+                
+                <p class="leading-relaxed text-balance mx-auto">This is a <strong>personalized journey</strong> designed to move you toward your exact goals by bridging the gap between world-class theory and daily practice.</p>
+                
+                <p class="leading-relaxed text-balance mx-auto">Every protocol is rooted in rigorous science and supported by a trusted network of <strong>technology, healthcare, and financial professionals</strong>.</p>
+                
+                <p class="leading-relaxed text-balance mx-auto">We are trading the hollow "showing off" of the digital age for the humble, compounding act of <strong>showing up</strong>.</p>
+            </div>
+
+            <!-- Stagger 3: Action -->
+            <div id="welcome-action" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out mt-16 text-center w-full">
+                <button id="btn-come-in" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-12 rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-3 mx-auto w-full sm:w-auto text-lg group">
+                    Come In <i class="ph-bold ph-door-open text-2xl group-hover:translate-x-1 transition-transform"></i>
+                </button>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- VIEW 1.5: PROFILE & DEMOGRAPHICS -->
+    <div id="view-profile" class="hidden min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-0">
+        <main class="max-w-xl w-full bg-white rounded-[2rem] shadow-xl border border-slate-200 p-8 md:p-12">
+            <div class="text-center mb-8">
+                <div class="w-16 h-16 bg-blue-50 text-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 border border-blue-100">
+                    <i class="ph-fill ph-user text-3xl"></i>
+                </div>
+                <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2">Tell us about yourself</h2>
+                <p class="text-slate-500 text-sm">To curate the most accurate clinical and behavioral protocols, the Nudge Engine needs your basic demographics.</p>
+            </div>
+
+            <div class="space-y-5">
+                <!-- Name -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">First Name</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph-bold ph-identification-card text-slate-400 text-lg"></i>
+                        </div>
+                        <input type="text" id="user-name" placeholder="What should we call you?" class="w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900">
+                    </div>
+                </div>
+
+                <!-- Age -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Age Range</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph-bold ph-calendar-blank text-slate-400 text-lg"></i>
+                        </div>
+                        <select id="user-age" class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
+                            <option value="" disabled selected>Select your age range...</option>
+                            <!-- Populated by JS -->
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Gender -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Biological Gender</label>
+                    <div class="relative">
+                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
+                            <i class="ph-bold ph-gender-intersex text-slate-400 text-lg"></i>
+                        </div>
+                        <select id="user-gender" class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
+                            <option value="" disabled selected>Select your biological sex...</option>
+                            <option value="Female">Female</option>
+                            <option value="Male">Male</option>
+                            <option value="Non-binary">Non-binary / Other</option>
+                            <option value="Prefer not to share">Prefer not to share</option>
+                        </select>
+                    </div>
+                    <p class="text-[10px] text-slate-400 mt-2 ml-1 leading-snug">Used strictly to tailor specific clinical biomarker targets and cancer screening timelines.</p>
+                </div>
+
+                <!-- Error Msg -->
+                <p id="profile-error" class="text-xs text-rose-500 font-semibold h-4 opacity-0 transition-opacity text-center mt-2">Please complete all fields to continue.</p>
+
+                <!-- Action -->
+                <div class="pt-4">
+                    <button id="btn-profile-continue" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 group">
+                        Calibrate My Engine <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
+                    </button>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- VIEW 2: SLIDER & PERSONA (ONBOARDING) -->
     <div id="view-onboarding" class="hidden min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500 opacity-0">
         <main class="max-w-3xl w-full bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden">
-            <section class="px-8 pt-12 pb-8 text-center border-b border-slate-100">
-                <div class="w-16 h-16 bg-slate-900 rounded-2xl mx-auto flex items-center justify-center shadow-lg mb-6">
-                    <span class="text-white font-bold text-3xl tracking-tighter">N</span>
-                </div>
-                <h1 class="text-3xl md:text-4xl font-bold tracking-tight mb-2">Nudge</h1>
-                <h2 class="text-xs md:text-sm font-semibold text-slate-500 uppercase tracking-widest mb-8">The Art & Science of Showing Up</h2>
-                <div class="text-slate-600 leading-relaxed text-sm md:text-base max-w-2xl mx-auto text-balance space-y-4">
-                    <p>Modern health has become a circus of clout and click farming. <strong>We’re opting out.</strong> We are trading the hollow "showing off" of the digital age for the humble act of <strong>showing up</strong>.</p>
-                    <p><strong class="text-emerald-500">Longevity</strong> isn't a hack; it’s a process fueled by intention and sacrifice. But to be truly engaged, we must also focus on <strong class="text-rose-500">Nowgevity</strong>—the power and joy of living well today.</p>
-                    <p class="text-base md:text-lg"><strong class="text-slate-800">Choose your balance.</strong></p>
-                </div>
+            
+            <section class="px-8 pt-10 pb-6 text-center border-b border-slate-100">
+                <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2" id="slider-greeting-title">Choose Your Balance</h1>
+                <p class="text-slate-500 text-sm max-w-lg mx-auto text-balance">Slide to adjust your primary focus. Nudge will curate a unique protocol based on your desired equilibrium.</p>
             </section>
 
             <section class="px-8 py-10 bg-slate-50/50">
@@ -157,7 +256,7 @@
         </main>
     </div>
 
-    <!-- VIEW 2: PROGRESSIVE JOURNEY PAGE (ASSESSMENT) -->
+    <!-- VIEW 3: PROGRESSIVE JOURNEY PAGE (ASSESSMENT) -->
     <div id="view-assessment" class="hidden min-h-screen pb-20 transition-opacity duration-500 opacity-0">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -194,7 +293,7 @@
         </main>
     </div>
 
-    <!-- VIEW 3: 30-DAY PROTOCOL DASHBOARD -->
+    <!-- VIEW 4: 30-DAY PROTOCOL DASHBOARD -->
     <div id="view-dashboard" class="hidden min-h-screen pb-20 transition-opacity duration-500 opacity-0">
         <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
             <div class="max-w-6xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
@@ -206,7 +305,9 @@
                         <p class="text-xs font-bold text-slate-500 uppercase tracking-widest">Your Points</p>
                         <p class="text-sm font-bold text-emerald-600" id="header-xp">0 XP</p>
                     </div>
-                    <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+                    <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center cursor-pointer hover:bg-slate-800 transition-colors" id="btn-open-partner">
+                        <span class="text-white font-bold text-sm">N</span>
+                    </div>
                 </div>
             </div>
         </header>
@@ -214,7 +315,6 @@
         <main class="max-w-6xl mx-auto px-4 sm:px-6 pt-8 md:pt-12">
             <!-- Journey Header & Progress -->
             <div class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-8 relative overflow-hidden">
-                <!-- Background Decoration -->
                 <div class="absolute -right-10 -top-10 opacity-5 pointer-events-none">
                     <i id="dash-bg-icon" class="ph-fill ph-scales text-[200px]"></i>
                 </div>
@@ -437,6 +537,54 @@
         </main>
     </div>
 
+    <!-- VIEW 5: PARTNER & PRACTITIONER PAGE -->
+    <div id="view-partner" class="hidden min-h-screen bg-slate-50 pb-20 transition-opacity duration-500 opacity-0">
+        <!-- Header -->
+        <header class="bg-white border-b border-slate-200 sticky top-0 z-40 shadow-sm">
+            <div class="max-w-4xl mx-auto px-4 sm:px-6 py-4 flex items-center justify-between">
+                <button id="back-from-partner-btn" class="flex items-center gap-2 text-sm font-semibold text-slate-500 hover:text-slate-900 transition-colors">
+                    <i class="ph-bold ph-arrow-left"></i> Back to Engine
+                </button>
+                <div class="w-8 h-8 bg-slate-900 rounded-lg flex items-center justify-center"><span class="text-white font-bold text-sm">N</span></div>
+            </div>
+        </header>
+
+        <main class="max-w-4xl mx-auto px-4 sm:px-6 pt-12">
+            <div class="text-center mb-12">
+                <h1 class="text-4xl font-bold tracking-tight text-slate-900 mb-4">The Nudge Network</h1>
+                <p class="text-lg text-slate-600 max-w-2xl mx-auto">We integrate with industry-leading technology, medical professionals, and real community leaders to make showing up frictionless.</p>
+            </div>
+
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
+                <div class="flex items-center gap-3 mb-6">
+                    <div class="p-2 bg-slate-100 text-slate-700 rounded-lg"><i class="ph-bold ph-plugs-connected text-xl"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-900">Technology Partners</h2>
+                </div>
+                <p class="text-slate-600 mb-8 text-sm md:text-base">Nudge uses industry-leading, science-backed, and well-reviewed apps and devices you already know and trust. Our API bridges the gap between raw data and actionable habits.</p>
+                
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-heartbeat text-4xl text-rose-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Apple Health</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-bold ph-circle text-4xl text-slate-800 mb-3"></i><span class="text-xs font-bold text-slate-700">Oura</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-watch text-4xl text-blue-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Garmin</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-wind text-4xl text-sky-400 mb-3"></i><span class="text-xs font-bold text-slate-700">Calm</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-fork-knife text-4xl text-indigo-500 mb-3"></i><span class="text-xs font-bold text-slate-700">MyFitnessPal</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-pill text-4xl text-emerald-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Felix</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl"><i class="ph-fill ph-google-logo text-4xl text-amber-500 mb-3"></i><span class="text-xs font-bold text-slate-700">Google Health</span></div>
+                    <div class="flex flex-col items-center justify-center p-6 bg-slate-50 border border-slate-100 rounded-2xl border-dashed bg-transparent"><i class="ph-bold ph-plus text-2xl text-slate-400 mb-3"></i><span class="text-xs font-bold text-slate-500">More Coming</span></div>
+                </div>
+            </section>
+
+            <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-8 mb-8">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="p-2 bg-emerald-50 text-emerald-600 rounded-lg"><i class="ph-bold ph-stethoscope text-xl"></i></div>
+                    <h2 class="text-2xl font-bold text-slate-900">Healthcare Practitioners</h2>
+                </div>
+                <p class="text-slate-600 mb-6 text-sm md:text-base">Nudge works with certified Healthcare Practitioners to keep you safe and well-guided. We believe longevity protocols must be backed by medical oversight.</p>
+                <button class="px-6 py-2.5 bg-emerald-600 text-white font-semibold rounded-xl hover:bg-emerald-700 transition-colors text-sm">Apply as Practitioner</button>
+            </section>
+        </main>
+    </div>
+
     <!-- MAIN SCRIPT -->
     <script>
         // Init Lucide Icons
@@ -445,17 +593,30 @@
         // ---------------------------------------------------------
         // DOM ELEMENTS & VARIABLES
         // ---------------------------------------------------------
+        // Views
         const viewLogin = document.getElementById('view-login');
+        const viewWelcome = document.getElementById('view-welcome');
+        const viewProfile = document.getElementById('view-profile');
         const viewOnboarding = document.getElementById('view-onboarding');
         const viewAssessment = document.getElementById('view-assessment');
         const viewDashboard = document.getElementById('view-dashboard');
+        const viewPartner = document.getElementById('view-partner');
         
-        // Login
+        // Login & Welcome
         const loginBtn = document.getElementById('login-btn');
         const passwordInput = document.getElementById('access-code-input');
         const loginError = document.getElementById('login-error');
+        const btnComeIn = document.getElementById('btn-come-in');
         
+        // Profile
+        const btnProfileContinue = document.getElementById('btn-profile-continue');
+        const userNameInput = document.getElementById('user-name');
+        const userAgeInput = document.getElementById('user-age');
+        const userGenderInput = document.getElementById('user-gender');
+        const profileError = document.getElementById('profile-error');
+
         // Onboarding UI
+        const sliderGreetingTitle = document.getElementById('slider-greeting-title');
         const mainSlider = document.getElementById('balance-slider');
         const focusTitle = document.getElementById('focus-title');
         const focusIcon = document.getElementById('focus-icon');
@@ -496,15 +657,24 @@
         const quoteCategory = document.getElementById('quote-category');
 
         // State
+        let userProfile = { name: '', age: '', gender: '' };
         let currentJourneyVal = 50;
         let currentLevel = 100;
         let currentDay = 1;
         let userXP = 0;
         const MAX_LEVEL_XP = 900; 
-        // Logic: Daily(10x30=300) + Learn(25x4=100) + Do(50x4=200) + Diag(150x2=300) = 900 XP max.
-        
-        // In-Memory Progress Tracking
         let progressState = {};
+
+        // ---------------------------------------------------------
+        // SETUP PROFILE AGE RANGES
+        // ---------------------------------------------------------
+        for (let i = 18; i <= 118; i += 5) {
+            let end = i === 118 ? 123 : i + 4;
+            let opt = document.createElement('option');
+            opt.value = `${i}-${end}`;
+            opt.textContent = `${i}-${end} years old`;
+            userAgeInput.appendChild(opt);
+        }
 
         // ---------------------------------------------------------
         // DAILY CONTENT ARRAYS
@@ -545,7 +715,7 @@
         ];
 
         // ---------------------------------------------------------
-        // LOGIN GATE LOGIC
+        // LOGIN & CINEMATIC WELCOME
         // ---------------------------------------------------------
         const EXPECTED_DOC_LINK = "docs.google.com/document/d/"; 
         const FALLBACK_PASSWORD = "nudge"; 
@@ -556,8 +726,13 @@
                 viewLogin.classList.add('opacity-0');
                 setTimeout(() => {
                     viewLogin.classList.add('hidden');
-                    viewOnboarding.classList.remove('hidden');
-                    setTimeout(() => viewOnboarding.classList.remove('opacity-0'), 50);
+                    viewWelcome.classList.remove('hidden');
+                    setTimeout(() => {
+                        viewWelcome.classList.remove('opacity-0');
+                        setTimeout(() => document.getElementById('welcome-nudge').classList.remove('opacity-0', 'translate-y-6'), 300);
+                        setTimeout(() => document.getElementById('welcome-manifesto').classList.remove('opacity-0', 'translate-y-6'), 1500);
+                        setTimeout(() => document.getElementById('welcome-action').classList.remove('opacity-0', 'translate-y-6'), 3500);
+                    }, 50);
                 }, 500);
             } else {
                 loginError.classList.remove('opacity-0');
@@ -571,8 +746,26 @@
         loginBtn.addEventListener('click', handleLogin);
         passwordInput.addEventListener('keypress', (e) => { if (e.key === 'Enter') handleLogin(); loginError.classList.add('opacity-0'); });
 
+        btnComeIn.addEventListener('click', () => navigate(viewWelcome, viewProfile));
+
+        btnProfileContinue.addEventListener('click', () => {
+            if (!userNameInput.value.trim() || !userAgeInput.value || !userGenderInput.value) {
+                profileError.classList.remove('opacity-0');
+                return;
+            }
+            
+            userProfile.name = userNameInput.value.trim();
+            userProfile.age = userAgeInput.value;
+            userProfile.gender = userGenderInput.value;
+            
+            // Personalize the next screen
+            sliderGreetingTitle.textContent = `Choose Your Balance, ${userProfile.name}`;
+            
+            navigate(viewProfile, viewOnboarding);
+        });
+
         // ---------------------------------------------------------
-        // GOOGLE SHEETS & FALLBACK LOGIC
+        // GOOGLE SHEETS & DEMOGRAPHIC LOGIC
         // ---------------------------------------------------------
         const GOOGLE_SHEET_CSV_URL = "https://docs.google.com/spreadsheets/d/e/2PACX-1vTwP4c_8wCC_LTEWkxP7vG2MB9hzD2xloWRFAoEE1G1Atr8DQUMyH6nevvOcgIwBt5vGbrvY0s90rAz/pub?gid=43139328&single=true&output=csv"; 
         let sheetDatabase = []; 
@@ -610,8 +803,24 @@
                 Do_Month_Cue: "...", Do_Month_Resp: "...", Do_Month_Rew: "..."
             };
             if (row) { dataObj = { ...dataObj, ...row }; }
-            dataObj.Required_Health_Diagnostic = dataObj.Required_Health_Diagnostic || FALLBACK_DIAGNOSTICS.health[level] || "Pending requirements.";
-            dataObj.Required_Wealth_Diagnostic = dataObj.Required_Wealth_Diagnostic || FALLBACK_DIAGNOSTICS.wealth[level] || "Pending requirements.";
+            
+            // Base Diagnostics
+            let healthDiag = FALLBACK_DIAGNOSTICS.health[level];
+            
+            // DEMOGRAPHIC INJECTION LOGIC
+            // If the user is aged 43+ and Level 200 or 300, we inject cancer screening protocols.
+            if (userProfile.age) {
+                let ageStart = parseInt(userProfile.age.split('-')[0]);
+                if (ageStart >= 43 && (level == 200 || level == 300)) {
+                    if (userProfile.gender === "Female") healthDiag += " Also schedule a routine Mammogram/Pap Smear.";
+                    else if (userProfile.gender === "Male") healthDiag += " Also schedule a routine Prostate cancer screening.";
+                    else healthDiag += " Also schedule age-appropriate routine cancer screenings.";
+                }
+            }
+
+            dataObj.Required_Health_Diagnostic = dataObj.Required_Health_Diagnostic || healthDiag;
+            dataObj.Required_Wealth_Diagnostic = dataObj.Required_Wealth_Diagnostic || FALLBACK_DIAGNOSTICS.wealth[level];
+            
             return dataObj;
         }
 
@@ -658,14 +867,7 @@
             document.getElementById('assessment-icon-container').className = `w-16 h-16 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border ${journeyData.bgClass}`;
 
             renderAssessment(currentJourneyVal);
-
-            viewOnboarding.classList.add('opacity-0');
-            setTimeout(() => {
-                viewOnboarding.classList.add('hidden');
-                viewAssessment.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                setTimeout(() => viewAssessment.classList.remove('opacity-0'), 50);
-            }, 500);
+            navigate(viewOnboarding, viewAssessment);
         });
 
         // ---------------------------------------------------------
@@ -706,14 +908,7 @@
             else currentLevel = 100;
 
             setupDashboard();
-
-            viewAssessment.classList.add('opacity-0');
-            setTimeout(() => {
-                viewAssessment.classList.add('hidden');
-                viewDashboard.classList.remove('hidden');
-                window.scrollTo(0, 0);
-                setTimeout(() => viewDashboard.classList.remove('opacity-0'), 50);
-            }, 500);
+            navigate(viewAssessment, viewDashboard);
         });
 
         // ---------------------------------------------------------
@@ -725,7 +920,6 @@
             const percentage = Math.min((userXP / MAX_LEVEL_XP) * 100, 100);
             progressBarFill.style.width = `${percentage}%`;
             
-            // Sync Checkboxes
             cbDaily.checked = progressState[`l${currentLevel}_d${currentDay}_daily`] || false;
             
             const currentWeek = Math.ceil(currentDay / 7);
@@ -772,11 +966,8 @@
 
         function loadDayData() {
             document.getElementById('dash-day-display').textContent = `Day ${currentDay} of 30`;
-            
-            // Set Daily Challenge
-            document.getElementById('daily-task-text').textContent = DAILY_CHALLENGES[currentDay - 1];
+            document.getElementById('daily-task-text').textContent = DAILY_CHALLENGES[currentDay - 1] || DAILY_CHALLENGES[0];
 
-            // Set Weekly Protocol based on day
             const weekNum = Math.ceil(currentDay / 7);
             
             protocolLoader.classList.add('active');
@@ -866,7 +1057,6 @@
         // DAILY COACHING MODAL
         // ---------------------------------------------------------
         btnCoaching.addEventListener('click', () => {
-            // Pick quote randomly, biased by journey (e.g. 100=Longevity, 0=Nowgevity)
             let quoteObj;
             let isNowgevity = Math.random() > (currentJourneyVal / 100);
             
@@ -884,7 +1074,6 @@
             quoteAuthor.textContent = quoteObj.a;
 
             modal.classList.remove('hidden');
-            // Animate in
             setTimeout(() => {
                 modal.classList.remove('opacity-0', 'pointer-events-none');
                 modalContent.classList.remove('scale-95');
@@ -900,7 +1089,7 @@
         });
 
         // ---------------------------------------------------------
-        // LEADERBOARD & ACCOUNTABILITY
+        // MOCK LEADERBOARD
         // ---------------------------------------------------------
         const MOCK_USERS = [
             { name: "Sarah M.", base: 780 },
@@ -910,7 +1099,8 @@
         ];
 
         function updateLeaderboard() {
-            let combined = [...MOCK_USERS, { name: "You (Beta)", base: userXP, isUser: true }];
+            let displayName = userProfile.name ? `${userProfile.name} (You)` : "You (Beta)";
+            let combined = [...MOCK_USERS, { name: displayName, base: userXP, isUser: true }];
             combined.sort((a, b) => b.base - a.base);
 
             leaderboardList.innerHTML = '';
@@ -940,6 +1130,24 @@
             btnPublishResults.classList.add('scale-[1.02]');
             setTimeout(() => btnPublishResults.classList.remove('scale-[1.02]'), 200);
         });
+
+        // ---------------------------------------------------------
+        // GLOBAL NAVIGATION
+        // ---------------------------------------------------------
+        function navigate(fromEl, toEl) {
+            fromEl.classList.add('opacity-0');
+            setTimeout(() => {
+                fromEl.classList.add('hidden');
+                toEl.classList.remove('hidden');
+                window.scrollTo(0, 0);
+                setTimeout(() => toEl.classList.remove('opacity-0'), 50);
+            }, 400);
+        }
+
+        document.getElementById('back-to-onboarding').addEventListener('click', () => navigate(viewAssessment, viewOnboarding));
+        document.getElementById('back-to-assessment').addEventListener('click', () => navigate(viewDashboard, viewAssessment));
+        document.getElementById('btn-open-partner').addEventListener('click', () => navigate(viewDashboard, viewPartner));
+        document.getElementById('back-from-partner-btn').addEventListener('click', () => navigate(viewPartner, viewDashboard));
 
     </script>
 </body>
