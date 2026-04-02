@@ -52,6 +52,10 @@
         
         /* Select Input Styling */
         select { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 1rem center; background-size: 1em; }
+        
+        /* Hide Number Input Spinners */
+        input[type=number]::-webkit-inner-spin-button, input[type=number]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+        input[type=number] { -moz-appearance: textfield; }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen text-slate-900 font-sans selection:bg-emerald-100 selection:text-emerald-900">
@@ -79,6 +83,29 @@
         </div>
     </div>
 
+    <!-- JOURNEY FOUNDATION CHECKLIST MODAL -->
+    <div id="checklist-modal" class="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-300">
+        <div class="glass-modal max-w-md w-full rounded-[2rem] shadow-2xl p-8 relative transform scale-95 transition-transform duration-300" id="checklist-modal-content">
+            <button id="close-checklist-btn" class="absolute top-5 right-5 text-slate-400 hover:text-slate-900 transition-colors bg-slate-100 hover:bg-slate-200 p-2 rounded-full">
+                <i class="ph-bold ph-x"></i>
+            </button>
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-indigo-50 text-indigo-600 border border-indigo-100 rounded-xl flex items-center justify-center shadow-sm">
+                    <i class="ph-bold ph-list-checks text-xl"></i>
+                </div>
+                <div>
+                    <h3 class="text-xs font-bold uppercase tracking-widest text-slate-400">Core Objectives</h3>
+                    <p class="font-bold text-slate-900 text-sm">Journey Foundation Checklist</p>
+                </div>
+            </div>
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed border-b border-slate-100 pb-6">To truly master this specific journey, your long-term plan should explicitly account for the following foundational pillars.</p>
+            
+            <ul id="checklist-items" class="space-y-4 mb-2">
+                <!-- Populated via JS based on Nowgevity vs Longevity -->
+            </ul>
+        </div>
+    </div>
+
     <!-- VIEW 0: LOGIN GATE -->
     <div id="view-login" class="min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-500">
         <main class="max-w-md w-full bg-white rounded-[2rem] shadow-xl border border-slate-200 overflow-hidden animate-in fade-in slide-in-from-bottom-4 duration-700 p-8 md:p-10 text-center">
@@ -102,7 +129,6 @@
     <div id="view-welcome" class="hidden min-h-screen flex items-center justify-center p-4 md:p-8 transition-opacity duration-700 opacity-0">
         <main class="max-w-4xl w-full px-6 py-12 md:py-20 flex flex-col items-center">
             
-            <!-- Stagger 1: Branding -->
             <div id="welcome-nudge" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out flex flex-col items-center w-full text-center">
                 <div class="w-20 h-20 md:w-24 md:h-24 bg-slate-900 rounded-[2rem] mx-auto flex items-center justify-center shadow-2xl mb-8">
                     <span class="text-white font-bold text-4xl md:text-5xl tracking-tighter">N</span>
@@ -111,7 +137,6 @@
                 <h2 class="text-xs md:text-sm font-bold text-slate-400 uppercase tracking-[0.3em] pl-[0.3em] w-full">The Art & Science of Showing Up</h2>
             </div>
 
-            <!-- Stagger 2: Manifesto -->
             <div id="welcome-manifesto" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out mt-12 max-w-2xl mx-auto text-center space-y-6 text-slate-600 md:text-lg">
                 <p class="font-bold text-slate-900 text-xl md:text-2xl leading-relaxed text-balance mx-auto">Nudge is your companion and concierge through the journey to a happier, healthier, and hopefully longer life.</p>
                 
@@ -122,7 +147,6 @@
                 <p class="leading-relaxed text-balance mx-auto">We are trading the hollow "showing off" of the digital age for the humble, compounding act of <strong>showing up</strong>.</p>
             </div>
 
-            <!-- Stagger 3: Action -->
             <div id="welcome-action" class="opacity-0 translate-y-6 transition-all duration-1000 ease-out mt-16 text-center w-full">
                 <button id="btn-come-in" class="bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-12 rounded-2xl transition-all shadow-xl hover:shadow-2xl hover:-translate-y-1 active:scale-[0.98] flex items-center justify-center gap-3 mx-auto w-full sm:w-auto text-lg group">
                     Come In <i class="ph-bold ph-door-open text-2xl group-hover:translate-x-1 transition-transform"></i>
@@ -140,7 +164,7 @@
                     <i class="ph-fill ph-user text-3xl"></i>
                 </div>
                 <h2 class="text-2xl md:text-3xl font-bold tracking-tight text-slate-900 mb-2">Tell us about yourself</h2>
-                <p class="text-slate-500 text-sm">To curate the most accurate clinical and behavioral protocols, the Nudge Engine needs your basic demographics.</p>
+                <p class="text-slate-500 text-sm">To curate the most accurate clinical protocols, the Nudge Engine needs your basic demographics and biomarkers.</p>
             </div>
 
             <div class="space-y-5">
@@ -155,43 +179,57 @@
                     </div>
                 </div>
 
-                <!-- Age -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Age Range</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="ph-bold ph-calendar-blank text-slate-400 text-lg"></i>
-                        </div>
-                        <select id="user-age" class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
-                            <option value="" disabled selected>Select your age range...</option>
+                <!-- Age & Gender -->
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Age Range</label>
+                        <select id="user-age" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
+                            <option value="" disabled selected>Select...</option>
                             <!-- Populated by JS -->
                         </select>
                     </div>
-                </div>
-
-                <!-- Gender -->
-                <div>
-                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Biological Gender</label>
-                    <div class="relative">
-                        <div class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-                            <i class="ph-bold ph-gender-intersex text-slate-400 text-lg"></i>
-                        </div>
-                        <select id="user-gender" class="w-full pl-11 pr-10 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
-                            <option value="" disabled selected>Select your biological sex...</option>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Biological Sex</label>
+                        <select id="user-gender" class="w-full px-4 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 cursor-pointer">
+                            <option value="" disabled selected>Select...</option>
                             <option value="Female">Female</option>
                             <option value="Male">Male</option>
-                            <option value="Non-binary">Non-binary / Other</option>
-                            <option value="Prefer not to share">Prefer not to share</option>
+                            <option value="Non-binary">Other</option>
+                            <option value="Prefer not to share">Skip</option>
                         </select>
                     </div>
-                    <p class="text-[10px] text-slate-400 mt-2 ml-1 leading-snug">Used strictly to tailor specific clinical biomarker targets and cancer screening timelines.</p>
+                </div>
+
+                <!-- Height & Weight (BMI Calc) -->
+                <div>
+                    <label class="block text-xs font-bold text-slate-500 uppercase tracking-widest mb-2 ml-1">Height & Weight</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <div class="relative">
+                            <input type="number" id="user-height-ft" placeholder="Ft" class="w-full pl-4 pr-6 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 text-center">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"><span class="text-slate-400 text-xs font-bold">ft</span></div>
+                        </div>
+                        <div class="relative">
+                            <input type="number" id="user-height-in" placeholder="In" class="w-full pl-4 pr-6 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 text-center">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"><span class="text-slate-400 text-xs font-bold">in</span></div>
+                        </div>
+                        <div class="relative">
+                            <input type="number" id="user-weight" placeholder="Lbs" class="w-full pl-3 pr-8 py-3.5 bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500 focus:bg-white transition-all font-medium text-slate-900 text-center">
+                            <div class="absolute inset-y-0 right-0 pr-3 flex items-center pointer-events-none"><span class="text-slate-400 text-xs font-bold">lbs</span></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Dynamic BMI Display -->
+                    <div id="bmi-container" class="hidden mt-3 flex items-center justify-center bg-blue-50/50 border border-blue-100 rounded-xl py-2.5 px-4 transition-all">
+                        <i class="ph-fill ph-activity text-blue-500 mr-2 text-lg"></i>
+                        <p class="text-xs font-bold text-blue-800 tracking-wide" id="bmi-display">Calculated BMI: --</p>
+                    </div>
                 </div>
 
                 <!-- Error Msg -->
-                <p id="profile-error" class="text-xs text-rose-500 font-semibold h-4 opacity-0 transition-opacity text-center mt-2">Please complete all fields to continue.</p>
+                <p id="profile-error" class="text-xs text-rose-500 font-semibold h-4 opacity-0 transition-opacity text-center mt-2">Please complete all fields to establish baseline.</p>
 
                 <!-- Action -->
-                <div class="pt-4">
+                <div class="pt-2">
                     <button id="btn-profile-continue" class="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-4 px-8 rounded-xl transition-all shadow-md hover:shadow-lg active:scale-[0.98] flex items-center justify-center gap-2 group">
                         Calibrate My Engine <i class="ph-bold ph-arrow-right group-hover:translate-x-1 transition-transform"></i>
                     </button>
@@ -270,12 +308,16 @@
         </header>
 
         <main class="max-w-3xl mx-auto px-4 sm:px-6 pt-12">
-            <div class="text-center mb-10">
+            <div class="text-center mb-8">
                 <div id="assessment-icon-container" class="w-16 h-16 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-6 shadow-sm border border-emerald-100">
                     <i id="assessment-page-icon" class="ph-fill ph-scales text-3xl text-emerald-500"></i>
                 </div>
                 <h1 class="text-3xl font-bold tracking-tight text-slate-900 mb-2">Establish Your Baseline</h1>
-                <p class="text-slate-600 text-sm max-w-xl mx-auto">Be honest. We judge harshly. Let's calibrate the Nudge Engine to your true current habits so we can assign you the correct protocol.</p>
+                <p class="text-slate-600 text-sm max-w-xl mx-auto mb-5">Be honest. We judge harshly. Let's calibrate the Nudge Engine to your true current habits so we can assign you the correct protocol.</p>
+                
+                <button id="btn-open-checklist" class="inline-flex items-center justify-center gap-2 text-xs font-bold text-indigo-600 bg-indigo-50 hover:bg-indigo-100 px-4 py-2 rounded-xl transition-colors border border-indigo-100 mx-auto">
+                    <i class="ph-bold ph-list-checks"></i> View Journey Foundation Checklist
+                </button>
             </div>
 
             <section class="bg-white rounded-3xl shadow-sm border border-slate-200 p-6 md:p-8 mb-12">
@@ -613,6 +655,11 @@
         const userNameInput = document.getElementById('user-name');
         const userAgeInput = document.getElementById('user-age');
         const userGenderInput = document.getElementById('user-gender');
+        const userHeightFt = document.getElementById('user-height-ft');
+        const userHeightIn = document.getElementById('user-height-in');
+        const userWeight = document.getElementById('user-weight');
+        const bmiContainer = document.getElementById('bmi-container');
+        const bmiDisplay = document.getElementById('bmi-display');
         const profileError = document.getElementById('profile-error');
 
         // Onboarding UI
@@ -630,6 +677,11 @@
         const assessmentContainer = document.getElementById('assessment-questions');
         const calculateBtn = document.getElementById('calculate-level-btn');
         const calculationResult = document.getElementById('calculation-result');
+        const btnOpenChecklist = document.getElementById('btn-open-checklist');
+        const checklistModal = document.getElementById('checklist-modal');
+        const checklistModalContent = document.getElementById('checklist-modal-content');
+        const closeChecklistBtn = document.getElementById('close-checklist-btn');
+        const checklistItems = document.getElementById('checklist-items');
         
         // Dashboard UI
         const protocolLoader = document.getElementById('protocol-loader');
@@ -657,7 +709,7 @@
         const quoteCategory = document.getElementById('quote-category');
 
         // State
-        let userProfile = { name: '', age: '', gender: '' };
+        let userProfile = { name: '', age: '', gender: '', bmi: '' };
         let currentJourneyVal = 50;
         let currentLevel = 100;
         let currentDay = 1;
@@ -666,7 +718,7 @@
         let progressState = {};
 
         // ---------------------------------------------------------
-        // SETUP PROFILE AGE RANGES
+        // SETUP PROFILE LOGIC (BMI & Age)
         // ---------------------------------------------------------
         for (let i = 18; i <= 118; i += 5) {
             let end = i === 118 ? 123 : i + 4;
@@ -675,6 +727,40 @@
             opt.textContent = `${i}-${end} years old`;
             userAgeInput.appendChild(opt);
         }
+
+        function calculateBMI() {
+            let ft = parseInt(userHeightFt.value) || 0;
+            let inch = parseInt(userHeightIn.value) || 0;
+            let lbs = parseInt(userWeight.value) || 0;
+
+            if ((ft > 0 || inch > 0) && lbs > 0) {
+                let totalInches = (ft * 12) + inch;
+                let bmi = (lbs / (totalInches * totalInches)) * 703;
+                if(bmi > 0 && bmi < 100) {
+                    let category = "Normal";
+                    let color = "text-blue-800";
+                    let bg = "bg-blue-50/50 border-blue-100";
+                    let iconColor = "text-blue-500";
+
+                    if(bmi < 18.5) { category = "Underweight"; }
+                    else if(bmi >= 25 && bmi < 30) { category = "Overweight"; color = "text-amber-800"; bg = "bg-amber-50/50 border-amber-100"; iconColor = "text-amber-500"; }
+                    else if(bmi >= 30) { category = "Obese"; color = "text-rose-800"; bg = "bg-rose-50/50 border-rose-100"; iconColor = "text-rose-500"; }
+                    
+                    bmiDisplay.textContent = `Calculated BMI: ${bmi.toFixed(1)} (${category})`;
+                    bmiContainer.className = `mt-3 flex items-center justify-center border rounded-xl py-2.5 px-4 transition-all ${bg}`;
+                    bmiDisplay.className = `text-xs font-bold uppercase tracking-widest ${color}`;
+                    bmiContainer.querySelector('i').className = `ph-fill ph-activity mr-2 text-lg ${iconColor}`;
+                    userProfile.bmi = bmi.toFixed(1);
+                }
+            } else {
+                bmiContainer.classList.add('hidden');
+                userProfile.bmi = '';
+            }
+        }
+
+        userHeightFt.addEventListener('input', calculateBMI);
+        userHeightIn.addEventListener('input', calculateBMI);
+        userWeight.addEventListener('input', calculateBMI);
 
         // ---------------------------------------------------------
         // DAILY CONTENT ARRAYS
@@ -749,7 +835,7 @@
         btnComeIn.addEventListener('click', () => navigate(viewWelcome, viewProfile));
 
         btnProfileContinue.addEventListener('click', () => {
-            if (!userNameInput.value.trim() || !userAgeInput.value || !userGenderInput.value) {
+            if (!userNameInput.value.trim() || !userAgeInput.value || !userGenderInput.value || !userHeightFt.value || !userWeight.value) {
                 profileError.classList.remove('opacity-0');
                 return;
             }
@@ -758,9 +844,7 @@
             userProfile.age = userAgeInput.value;
             userProfile.gender = userGenderInput.value;
             
-            // Personalize the next screen
             sliderGreetingTitle.textContent = `Choose Your Balance, ${userProfile.name}`;
-            
             navigate(viewProfile, viewOnboarding);
         });
 
@@ -808,7 +892,6 @@
             let healthDiag = FALLBACK_DIAGNOSTICS.health[level];
             
             // DEMOGRAPHIC INJECTION LOGIC
-            // If the user is aged 43+ and Level 200 or 300, we inject cancer screening protocols.
             if (userProfile.age) {
                 let ageStart = parseInt(userProfile.age.split('-')[0]);
                 if (ageStart >= 43 && (level == 200 || level == 300)) {
@@ -871,8 +954,60 @@
         });
 
         // ---------------------------------------------------------
-        // CALIBRATION AUDIT (Level Assessment - Strict)
+        // CALIBRATION AUDIT & CHECKLIST LOGIC
         // ---------------------------------------------------------
+        btnOpenChecklist.addEventListener('click', () => {
+            let items = [];
+            if (currentJourneyVal < 50) {
+                // Nowgevity Dominant
+                items = [
+                    "Thorough Doctor Visit in last 12 months",
+                    "Financial Earning & Investing Plan",
+                    "Social Plan (Friends & Outreach)",
+                    "Stress Management Plan",
+                    "Nutrition Plan"
+                ];
+            } else if (currentJourneyVal > 50) {
+                // Longevity Dominant
+                items = [
+                    "Foundational Health Plan",
+                    "Retirement & Estate Planning",
+                    "Social and Mental Health Plan",
+                    "Longevity Supplement & Nutrition Plan"
+                ];
+            } else {
+                // Balanced (50/50)
+                items = [
+                    "Thorough Doctor Visit & Foundational Health Plan",
+                    "Financial Earning & Retirement Planning",
+                    "Social, Friends & Mental Health Plan",
+                    "Stress Management & Recovery Protocol",
+                    "Nutrition & Supplement Plan"
+                ];
+            }
+            
+            checklistItems.innerHTML = items.map(item => `
+                <li class="flex items-start gap-3 mb-3">
+                    <i class="ph-fill ph-check-circle text-emerald-500 mt-0.5 text-lg"></i> 
+                    <span class="text-slate-700 text-sm font-medium leading-relaxed">${item}</span>
+                </li>
+            `).join('');
+            
+            checklistModal.classList.remove('hidden');
+            setTimeout(() => {
+                checklistModal.classList.remove('opacity-0', 'pointer-events-none');
+                checklistModalContent.classList.remove('scale-95');
+                checklistModalContent.classList.add('scale-100');
+            }, 10);
+        });
+
+        closeChecklistBtn.addEventListener('click', () => {
+            checklistModal.classList.add('opacity-0', 'pointer-events-none');
+            checklistModalContent.classList.remove('scale-100');
+            checklistModalContent.classList.add('scale-95');
+            setTimeout(() => checklistModal.classList.add('hidden'), 300);
+        });
+
         const ASSESSMENT_QUESTIONS = {
             0: ["Have you done a basic mental health check-in recently?", "Do you consciously prioritize daily activities that bring you immediate joy?", "Have you read seminal books on presence (e.g., Brené Brown, Eckhart Tolle)?", "Do you actively and strictly track your digital screen time?", "Do you have a deeply connected friend group you can talk to about almost anything?", "Do you regularly work with a dedicated therapist or relational coach?", "Are daily mindfulness and joy-sourcing practices strictly entrenched in your life?", "Are you living at the edge of present-moment mastery (e.g., attending intensive retreats)?"],
             25: ["Have you done basic baseline bloodwork in the last 12 months?", "Do you have a basic automated savings plan or emergency fund set up?", "Do you use a wearable device to passively monitor your sleep and activity levels?", "Have you read key books on finding a sustainable balance between health and lifestyle?", "Do you have a close-knit group of friends who support your balanced lifestyle?", "Have you discussed a holistic, long-term wellness plan with your primary care doctor?", "Is a balanced routine of stress-reduction deeply entrenched in your week?", "Do you actively attend wellness retreats or consult directly with lifestyle design experts?"],
